@@ -8,3 +8,22 @@
   margin: 0;
   padding: 0;
 }
+
+body {
+  font-family: "Poppins", sans-serif;
+}
+
+.ant-input::placeholder {
+  color: #9194a0;
+  font-size: 20px; /* Set your desired color */
+}
+
+.ant-input {
+  color: #9194a0;
+  font-size: 20px;
+}
+
+/* Optional: Apply the font to Ant Design Typography elements specifically */
+.ant-typography {
+  font-family: "Poppins", sans-serif;
+}

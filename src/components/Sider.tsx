@@ -5,11 +5,10 @@ import nouserlogo from "@/assets/nouserlogo.png";
 import Image from "next/image";
 import { Layout, Avatar, Typography, Button, Row, Col } from "antd";
 import { EditOutlined } from "@ant-design/icons";
-import { Header } from "antd/es/layout/layout";
 const { Sider } = Layout;
 const { Paragraph } = Typography;
 
-const LeftSection = () => {
+const SiderSection = () => {
   const allChats = [
     {
       id: 1,
@@ -36,20 +35,10 @@ const LeftSection = () => {
     <Layout
       style={{
         backgroundColor: "#202429",
-        borderRadius: "14px",
-        height: "95%",
-        marginTop: "30px",
+        height: "100%",
       }}
-    >
-      {" "}
-      <Header
-        style={{
-          backgroundColor: "#202429",
-          borderBottom: "1px solid #212540",
-        }}
-      ></Header>
-    </Layout>
+    ></Layout>
   );
 };
 
-export default LeftSection;
+export default SiderSection;

@@ -1,67 +1,21 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import styles from "@/styles/RightSection.module.css";
-import chatgptlogo from "@/assets/chatgptlogo.png";
-import Logo from "@/assets/Logo.png";
 import nouserlogo from "@/assets/nouserlogo.png";
-import Image from "next/image";
-// import schoolbg from '@/assets/schoolBG.jpg'
 import { HashLoader } from "react-spinners";
-import { debug } from "console";
-const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API;
-// console.log(API_KEY)
+import { Button, Col, Input, message, Row } from "antd";
+const { TextArea } = Input;
+import { Layout, Typography, List, Avatar, Spin, Image } from "antd";
+import { ArrowDownOutlined, SendOutlined } from "@ant-design/icons";
+const { Header, Content, Footer } = Layout;
+const { Paragraph } = Typography;
+import SendLogoComponent from "../assets/sendLogo.svg"; // Adjust the path as necessary
+import LogoComponent from "../assets/Logo.svg"; // Adjust the path as necessary
+import AgentImageComponent from "../assets/Agent.svg"; // Adjust the path as necessary
+import { flightRouterStateSchema } from "next/dist/server/app-render/types";
+
 const RightSection = () => {
-  const trainingPrompt = [
-    {
-      role: "user",
-      parts: [
-        {
-          text: "This is Introductory dialogue for any prompt :  'Hello, my dear friend, I am the Spotcheck Bot. Ask me anything regarding procurement, purchase, and logistics. I will be happy to help you. '",
-        },
-      ],
-    },
-    {
-      role: "model",
-      parts: [
-        {
-          text: "okay",
-        },
-      ],
-    },
-    {
-      role: "user",
-      parts: [
-        {
-          text: "Special Dialogue 1 : if any prompt mentions 'Shashi Shahi' word :  'Ofcourse! Dr. Shashi Shahi is one of the prominent professors at UWindsor! He is an IIT-D alumni with year of invaluable experience and a fun way of engaging in lectures!' 'Likes: Analytics and Research and Case Studies ''Dislikes: Students near riverside.'",
-        },
-      ],
-    },
-    {
-      role: "model",
-      parts: [
-        {
-          text: "okay",
-        },
-      ],
-    },
-    {
-      role: "user",
-      parts: [
-        {
-          text: "Special Dialogue 2 : Any prompt that mentions CHATGPT class / classroom  A : ' The CHATGPT Batch of 2023 is by far the best the university has ever seen by all sets of standards. Students from different come together to form a truly diverse and culturally rich classroom experience. I believe that all students are highly capable and will achieve all great things in their professional career!' ",
-        },
-      ],
-    },
-    {
-      role: "model",
-      parts: [
-        {
-          text: "okay",
-        },
-      ],
-    },
-  ];
-  const [message, setMessage] = useState("");
+  const [messageC, setMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [allMessages, setAllMessages] = useState<any[]>([]);
   const [threadId, setThreadId] = useState("");
@@ -70,10 +24,37 @@ const RightSection = () => {
   const [latestMessageIndex, setlatestMessageIndex] = useState(0);
   const [latestMessage, setlatestMessage] = useState("");
   const [gotAnswer, setGotAnswer] = useState(false);
+  const [next, setNext] = useState("");
+  const [topic, setTopic] = useState("");
+  const [prompt, setPrompt] = useState("");
+  const [content, setContent] = useState("");
+  const [errorMessage, setErrorMessage] = useState(""); // State for error message
+  const [manualLead, setManuallead] = useState(false);
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      // Call a function to handle the submission of the message
+      setMessage(e.target.value);
+    }
+  };
 
   useEffect(() => {
-    getThreadId();
-  }, []);
+    if (next === "promptEngineer") {
+      promptEngineer();
+    } else if (next === "contentGenerator") {
+      contentGenerator();
+    } else if (next === "contentReviewer") {
+      contentReviewer();
+    }
+  }, [next]);
+
+  useEffect(() => {
+    errorMessage === "" ? null : errorHandling(errorMessage);
+  }, [errorMessage]);
+
+  useEffect(() => {
+    manualLead === true ? leadByUser() : null;
+  }, [manualLead]);
 
   useEffect(() => {
     if (
@@ -83,9 +64,8 @@ const RightSection = () => {
       setlatestMessageIndex(allMessages.length);
       setlatestMessage("");
     }
-
-    // allMessages[latestMessageIndex];
   }, [allMessages]);
+
   useEffect(() => {
     let index = latestMessageIndex;
     if (latestMessageIndex > 0 && latestMessage.length > 0) {
@@ -102,320 +82,741 @@ const RightSection = () => {
       });
     }
   }, [latestMessage, latestMessageIndex]);
-  const getThreadId = async () => {
-    const response = await fetch("https://api.openai.com/v1/threads", {
+  let concatenatedString = "";
+
+  const errorHandling = (errorMessage: any) => {
+    message.error(errorMessage);
+  };
+
+  const leadByUser = async () => {
+    setAllMessages((prevMessages) => [
+      ...prevMessages,
+      {
+        content:
+          "Please enter the topic you have in mind, our Prompt Engineer will help you generate prompt for the same topic.",
+        role: "Content Strategist",
+      },
+    ]);
+  };
+
+  const contentStrategist = async () => {
+    setAllMessages((prevMessages) => [
+      ...prevMessages,
+      { content: messageC, role: "user" },
+    ]);
+    try {
+      const requestBody = {
+        question: messageC,
+      };
+      const response = await fetch(
+        "http://localhost:3000/api/v1/prediction/907e40af-f770-4238-bbb4-a5feb839d3df",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        }
+      );
+      if (!response.ok) {
+        errorHandling(response.statusText);
+        throw new Error(`Network response was not ok: ${response.statusText}`);
+      }
+      const result = await response.json();
+      if (result.chatMessageId.length > 0) {
+        result.agentReasoning.map((item: any) => {
+          if (item.agentName === "Supervisor") {
+          } else {
+            // var trends = {};
+            const summary = JSON.parse(item.usedTools[0].toolOutput);
+            if (summary === "Data not found.!") {
+              setAllMessages((prevMessages) => [
+                ...prevMessages,
+                {
+                  content: (
+                    <>
+                      <Row>
+                        Unable to retrieve data trends from provider.Do you wish
+                        to proceed with the lead?{" "}
+                      </Row>
+                      <Row>
+                        <Col span={12}>
+                          <Button onClick={() => selectTopic(messageC)}>
+                            Yes
+                          </Button>
+                        </Col>
+                        <Col span={12}>
+                          <Button>No</Button>
+                        </Col>
+                      </Row>
+                    </>
+                  ),
+                  role: item.agentName,
+                },
+              ]);
+              return;
+            } else {
+              const trends = summary[messageC];
+              const topTrends = trends.top;
+              // const topTrends = trends.top;
+              const risingTrends = trends.rising;
+              // topicList = Object.values(trends);
+              setAllMessages((prevMessages) => [
+                ...prevMessages,
+                {
+                  content: (
+                    <>
+                      {/* return ( */}
+                      Here are the current trends, please select one topic to
+                      proceed further.
+                      <div>
+                        Below are Top Trends:
+                        <ul>
+                          {topTrends.map((item: any, index: any) => (
+                            <li
+                              style={{ cursor: "pointer" }}
+                              onClick={() => selectTopic(item.query)}
+                              key={index}
+                            >
+                              {item.query}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div>
+                        Below are Rising Trends:
+                        <ul>
+                          {risingTrends.map((item: any, index: any) => (
+                            <li
+                              style={{ cursor: "pointer" }}
+                              onClick={() => selectTopic(item.query)}
+                              key={index}
+                            >
+                              {item.query}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      {/* ) */}
+                    </>
+                  ),
+                  role: item.agentName,
+                },
+              ]);
+              return;
+            }
+          }
+        });
+      }
+      setMessage("");
+    } catch (error) {
+      setErrorMessage("An error occurred. Please try again later.");
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const selectTopic = async (topic: string) => {
+    setTopic(topic);
+    setNext("promptEngineer");
+  };
+
+  const selectPrompt = async (prompt: string) => {
+    setPrompt(prompt);
+    setNext("contentGenerator");
+  };
+
+  const selectContent = async (content: string) => {
+    setContent(content);
+    setNext("contentReviewer");
+  };
+
+  const contentGenerator = async () => {
+    setAllMessages((prevMessages) => [
+      ...prevMessages,
+      { content: prompt, role: "user" },
+    ]);
+    try {
+      const requestBody = {
+        question: prompt,
+      };
+      const response = await fetch(
+        "http://localhost:3000/api/v1/prediction/fdfb40b7-4de3-4667-9c9f-9c7850a3033f",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        }
+      );
+      if (!response.ok) {
+        errorHandling(response.statusText);
+        throw new Error(`Network response was not ok: ${response.statusText}`);
+      }
+      const result = await response.json();
+      if (result.chatMessageId.length > 0) {
+        const filterSupervisorMessages = result.agentReasoning.filter(
+          (item: any) => item.agentName !== "Supervisor"
+        );
+        const lastMessage =
+          filterSupervisorMessages[filterSupervisorMessages.length - 1]
+            .messages[0];
+        selectContent(lastMessage);
+        result.agentReasoning.map((item: any) => {
+          if (item.agentName === "Supervisor") {
+            return;
+          } else {
+            setAllMessages((prevMessages) => [
+              ...prevMessages,
+              {
+                content: lastMessage,
+                role: item.agentName,
+              },
+            ]);
+          }
+        });
+        setAllMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            content: (
+              <>
+                <Row>
+                  Do you wish to pass above content for Review AI Agent?{" "}
+                </Row>
+                <Row>
+                  <Col span={12}>
+                    <Button>Yes</Button>
+                  </Col>
+                  <Col span={12}>
+                    <Button>No</Button>
+                  </Col>
+                </Row>
+              </>
+            ),
+            role: "Content Generator",
+          },
+        ]);
+        setMessage("");
+      }
+    } catch (error) {
+      setErrorMessage("An error occurred. Please try again later.");
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const contentReviewer = async () => {
+    setAllMessages((prevMessages) => [
+      ...prevMessages,
+      { content: content, role: "user" },
+    ]);
+    try {
+      const requestBody = {
+        question: content,
+      };
+      const response = await fetch(
+        "http://localhost:3000/api/v1/prediction/3372c235-3ff1-4082-ad92-d6af33910014",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        }
+      );
+      if (!response.ok) {
+        // errorHandling(response.statusText);
+        // throw new Error(`Network response was not ok: ${response.statusText}`);
+        setAllMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            content: (
+              <>
+                <Row>
+                  There seem's to be issue with Reviewer AI Agent, Do you wish
+                  to proceed with above content for Approval?{" "}
+                </Row>
+                <Row>
+                  <Col span={12}>
+                    <Button onClick={() => marketingLeadApproval()}>Yes</Button>
+                  </Col>
+                  <Col span={12}>
+                    <Button>No</Button>
+                  </Col>
+                </Row>
+              </>
+            ),
+            role: "Supervisor",
+          },
+        ]);
+      }
+      const result = await response.json();
+      if (result.chatMessageId.length > 0) {
+        const filterSupervisorMessages = result.agentReasoning.filter(
+          (item: any) => item.agentName !== "Supervisor"
+        );
+        const lastMessage =
+          filterSupervisorMessages[filterSupervisorMessages.length - 1]
+            .messages[0];
+        // selectContent(lastMessage);
+        result.agentReasoning.map((item: any) => {
+          if (item.agentName === "Supervisor") {
+            return;
+          } else {
+            setAllMessages((prevMessages) => [
+              ...prevMessages,
+              {
+                content: lastMessage,
+                role: item.agentName,
+              },
+            ]);
+          }
+        });
+        setAllMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            content: (
+              <>
+                <Row>
+                  Do you wish to proceed to send content for Marketing Manager
+                  Lead AI for Approval?{" "}
+                </Row>
+                <Row>
+                  <Col span={12}>
+                    <Button>Yes</Button>
+                  </Col>
+                  <Col span={12}>
+                    <Button>No</Button>
+                  </Col>
+                </Row>
+              </>
+            ),
+            role: "Content Reviewer",
+          },
+        ]);
+        setMessage("");
+      }
+    } catch (error) {
+      setErrorMessage("An error occurred. Please try again later.");
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const marketingLeadApproval = async () => {
+    const response = await fetch("http://localhost:8000/marketingLead/", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${API_KEY}`,
         "Content-Type": "application/json",
-        "OpenAI-Beta": "assistants=v2",
       },
+      body: JSON.stringify({ text: content }),
     });
-
     if (!response.ok) {
-      throw new Error("Failed to create thread");
+      errorHandling(response.statusText);
+      throw new Error(`Network response was not ok: ${response.statusText}`);
     }
-    const threadId = await response.json();
-    setThreadId(threadId.id);
+    debugger;
+    const result = await response.json();
+    if (result.isApproved) {
+      setAllMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          content: (
+            <>
+              <Row>
+                Your content is Approved for posting. Do you wish to proceed?{" "}
+              </Row>
+              <Row>
+                <Col span={12}>
+                  <Button>Yes</Button>
+                </Col>
+                <Col span={12}>
+                  <Button>No</Button>
+                </Col>
+              </Row>
+            </>
+          ),
+          role: "Marketing Manager AI Agent",
+        },
+      ]);
+    } else {
+      setAllMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          content: (
+            <>
+              <Row>
+                Your content is Rejected for posting. Do you still wish to
+                proceed?{" "}
+              </Row>
+              <Row>
+                <Col span={12}>
+                  <Button>Yes</Button>
+                </Col>
+                <Col span={12}>
+                  <Button>No</Button>
+                </Col>
+              </Row>
+            </>
+          ),
+          role: "Marketing Manager AI Agent",
+        },
+      ]);
+    }
   };
-  let concatenatedString = "";
-  const sendMessage = async () => {
-    setIsSending(true);
-    if (threadId !== "") {
-      try {
-        const messageResponse = await fetch(
-          `https://api.openai.com/v1/threads/${threadId}/messages`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${API_KEY}`,
-              "Content-Type": "application/json",
-              "OpenAI-Beta": "assistants=v2",
-            },
-            body: JSON.stringify({
-              role: "user",
-              content: message,
-            }),
-          }
-        );
 
-        if (!messageResponse.ok) {
-          throw new Error("Failed to send message");
+  const promptEngineer = async () => {
+    setAllMessages((prevMessages) => [
+      ...prevMessages,
+      { content: topic, role: "user" },
+    ]);
+    try {
+      const requestBody = {
+        question: topic,
+      };
+      const response = await fetch(
+        "http://localhost:3000/api/v1/prediction/fc030d30-80a9-49c5-8d57-bbc5abcb86a8",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
         }
-
-        const { id, content } = await messageResponse.json();
-        const newMessage = { content: content[0].text.value, role: "user" };
-        if (content.length > 0) {
-          setAllMessages((prevMessages) => [...prevMessages, newMessage]);
-          // setlatestMessageIndex((prevIndex) => prevIndex + 2);
-          setMessage("");
-          try {
-            const runResponse = await fetch(
-              `https://api.openai.com/v1/threads/${threadId}/runs`,
-              {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${API_KEY}`,
-                  "Content-Type": "application/json",
-                  "OpenAI-Beta": "assistants=v2",
-                },
-                body: JSON.stringify({
-                  stream: true,
-                  tool_choice: null,
-                  // assistant_id: "asst_7orTXyhUqldCdI28epppJpVx",
-                  assistant_id: "asst_9KX7hWbvy2D6tvgsSra04U5r",
-                }),
-              }
-            );
-
-            if (!runResponse.ok) {
-              throw new Error("Failed to send message");
-            }
-            const reader = await runResponse.body?.getReader();
-            const processStream = async () => {
-              try {
-                // const reader = runResponse.body.getReader();
-                let buffer = ""; // Buffer for incomplete JSON data
-                let events = []; // Array to store parsed JSON objects
-                var answer = "";
-                while (true) {
-                  const { done, value } = await reader.read();
-                  if (done) {
-                    console.log("Stream complete");
-                    console.log(answer);
-                    // const newMessage = { content: answer, role: "bot" };
-                    // setAllMessages((prevMessages) => [
-                    //   ...prevMessages,
-                    //   newMessage,
-                    // ]);
-                    break;
-                  }
-                  buffer = new TextDecoder().decode(value); // Append new data to buffer
-                  let lines = buffer.split("\n"); // Split buffer into lines
-                  const dataArray = [];
-
-                  for (let i = 0; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (line.startsWith("data:")) {
-                      const jsonDataString = line
-                        .substring("data:".length)
-                        .trim();
-                      if (jsonDataString !== "[DONE]") {
-                        try {
-                          const jsonData = JSON.parse(jsonDataString);
-                          jsonData.object === "thread.message.delta"
-                            ? dataArray.push(jsonData)
-                            : null;
-                        } catch (error) {
-                          console.error("Error parsing JSON:", error);
-                        }
-                      }
-                    }
-                  }
-
-                  // let latestMessageIndex = allMessages.length
-                  //   ? allMessages.length - 1
-                  //   : 0;
-                  // const latestMessage =
-                  //   latestMessageIndex >= 0
-                  //     ? allMessages[latestMessageIndex]
-                  //     : { content: "", role: "bot" };
-                  // Process events array after each chunk is read
-                  for (const event of dataArray) {
-                    concatenatedString += event.delta.content[0].text.value;
-                    setlatestMessage(concatenatedString);
-                    // lat  estMessage.content +=
-                    // answer += event.delta.content[0].text.value;
-                    // const newMessage = { content: answer, role: "bot" };
-                    // setAllMessages((prevMessages) => [
-                    //   newMessage,
-                    //   ...prevMessages,
-                    // ]);
-                  }
-
-                  // const newMessage = { content: "", role: "bot" };
-                  // concatenatedString.length > 0
-                  //   ? setAllMessages((prevMessages) => [
-                  //       ...prevMessages,
-                  //       newMessage,
-                  //     ])
-                  //   : null;
-                }
-              } catch (error) {
-                console.error("Error reading stream:", error);
-              }
-            };
-            processStream();
-          } catch (error) {
-            console.error("Error sending message:", error);
-          }
-        }
-      } catch (error) {
-        console.error("Error sending message:", error);
+      );
+      if (!response.ok) {
+        errorHandling(response.statusText);
+        throw new Error(`Network response was not ok: ${response.statusText}`);
       }
+      const result = await response.json();
+      if (result.chatMessageId.length > 0) {
+        const filterSupervisorMessages = result.agentReasoning.filter(
+          (item: any) => item.agentName !== "Supervisor"
+        );
+        const lastMessage =
+          filterSupervisorMessages[filterSupervisorMessages.length - 1]
+            .messages[0];
+        selectPrompt(lastMessage);
+        result.agentReasoning.map((item: any) => {
+          if (item.agentName === "Supervisor") {
+            return;
+          } else {
+            setAllMessages((prevMessages) => [
+              ...prevMessages,
+              {
+                content: lastMessage,
+                role: item.agentName,
+              },
+            ]);
+          }
+        });
+        setAllMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            content: (
+              <>
+                <Row>Do you wish to proceed with above prompt? </Row>
+                <Row>
+                  <Col span={12}>
+                    <Button>Yes</Button>
+                  </Col>
+                  <Col span={12}>
+                    <Button>No</Button>
+                  </Col>
+                </Row>
+              </>
+            ),
+            role: "Prompt Generator",
+          },
+        ]);
+        setMessage("");
+      }
+    } catch (error) {
+      setErrorMessage("An error occurred. Please try again later.");
+    } finally {
+      setIsSending(false);
     }
-
-    setIsSending(false);
   };
 
-  // const sendMessage = async () => {
-
-  //     // let url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=` + API_KEY
-  //     let url = `https://api.openai.com/v1/chat/completions`
-  //     let token = `Bearer ${API_KEY}`;
-  //     let headers = {
-  //       'Authorization': token,
-  //       'Content-Type': 'application/json'
-  //     };
-  //     let messagesToSend = {
-  //         prompt: trainingPrompt,
-  //         max_tokens: 1000,  // Optional: Set the maximum response length
-  //         n: 1,              // Optional: Number of responses to generate (set to 1)
-  //         temperature: 0.7,   // Optional: Controls randomness of the response (0-1)
-  //       };
-
-  //     setIsSent(false)
-  //     let res = await fetch(url, {
-  //         method: 'POST',
-  //         headers: {
-  //             'Content-Type': 'application/json'
-  //         },
-  //         body: JSON.stringify({
-  //             "contents": messagesToSend
-  //         })
-  //     })
-
-  //     let resjson = await res.json()
-  //     setIsSent(true)
-  //     // console.log(resjson.candidates[0].content.parts[0].text)
-
-  //     let responseMessage = resjson.candidates[0].content.parts[0].text
-
-  //     let newAllMessages = [
-  //         ...allMessages,
-  //         {
-  //             "role": "user",
-  //             "parts": [{
-  //                 "text": message
-  //             }]
-  //         },
-  //         {
-  //             "role": "model",
-  //             "parts": [{
-  //                 "text": responseMessage
-  //             }]
-  //         }
-  //     ]
-
-  //     console.log(newAllMessages)
-
-  //     setAllMessages(newAllMessages)
-  //     setMessage('')
-  // }
   return (
-    <div className={styles.rightSection}>
-      {/* <Image src={schoolbg} alt="" className={styles.schoolbg} /> */}
-      <div className={styles.rightin}>
-        <div className={styles.chatgptversion}>
-          <p className={styles.text1}>Chat</p>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-6 h-6"
+    // <div className={styles.rightSection}>
+    //   <div className={styles.rightin}>
+    //     <div className={styles.chatgptversion}>
+    //       <p className={styles.text1}>Chat</p>
+    //       <svg
+    //         xmlns="http://www.w3.org/2000/svg"
+    //         fill="none"
+    //         viewBox="0 0 24 24"
+    //         strokeWidth={1.5}
+    //         stroke="currentColor"
+    //         className="w-6 h-6"
+    //       >
+    //         <path
+    //           strokeLinecap="round"
+    //           strokeLinejoin="round"
+    //           d="m19.5 8.25-7.5 7.5-7.5-7.5"
+    //         />
+    //       </svg>
+    //     </div>
+
+    //     {allMessages.length > 0 ? (
+    //       <div className={styles.messages}>
+    //         {allMessages.map((msg, index) => {
+    //           return (
+    //             <div key={index} className={styles.message}>
+    //               <Image
+    //                 src={msg.role === "user" ? nouserlogo : Logo}
+    //                 width={50}
+    //                 height={50}
+    //                 alt=""
+    //               />
+    //               <div className={styles.details}>
+    //                 <h2>{msg.role === "user" ? "You" : msg.role}</h2>
+    //                 <p>{msg.content}</p>{" "}
+    //                 {/* Access the text property of the content object */}
+    //               </div>
+    //             </div>
+    //           );
+    //         })}
+    //       </div>
+    //     ) : (
+    //       <div className={styles.nochat}>
+    //         <div className={styles.s1}>
+    //           <h1>How can I help you today?</h1>
+    //         </div>
+    //         {/* <div className={styles.s2}>
+    //           <div className={styles.suggestioncard}>
+    //             <h2>Recommend activities</h2>
+    //             <p>Compare Insurance Policies</p>
+    //           </div>
+    //           <div className={styles.suggestioncard}>
+    //             <h2>Recommend activities</h2>
+    //             <p>psychology behind decision-making</p>
+    //           </div>
+    //           <div className={styles.suggestioncard}>
+    //             <h2>Recommend activities</h2>
+    //             <p>psychology behind decision-making</p>
+    //           </div>
+    //           <div className={styles.suggestioncard}>
+    //             <h2>Recommend activities</h2>
+    //             <p>psychology behind decision-making</p>
+    //           </div>
+    //         </div> */}
+    //       </div>
+    //     )}
+
+    //     <div className={styles.bottomsection}>
+    //       <div className={styles.messagebar}>
+    //         <TextArea
+    //           placeholder="Message Spotcheck Bot..."
+    //           onChange={(e) => setMessage(e.target.value)}
+    //           onKeyDown={handleKeyPress} // Call handleKeyPress when a key is pressed
+    //           value={messageC}
+    //           autoSize
+    //           style={{ backgroundColor: "transparent", color: "white" }}
+    //         />
+    //         {!isSending ? (
+    //           <svg
+    //             onClick={contentStrategist}
+    //             xmlns="http://www.w3.org/2000/svg"
+    //             fill="none"
+    //             viewBox="0 0 24 24"
+    //             strokeWidth={1.5}
+    //             stroke="currentColor"
+    //             className="w-6 h-6"
+    //           >
+    //             <path
+    //               strokeLinecap="round"
+    //               strokeLinejoin="round"
+    //               d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18"
+    //             />
+    //           </svg>
+    //         ) : (
+    //           <HashLoader color="#36d7b7" size={30} />
+    //         )}
+    //       </div>
+    //       <p>
+    //         Spotcheck Bot can make mistakes. Consider checking important
+    //         information.
+    //       </p>
+    //     </div>
+    //   </div>
+    // </div>
+    <Layout
+      style={{
+        backgroundColor: "#202429",
+        borderRadius: "14px",
+        height: "95%",
+        marginTop: "30px",
+      }}
+    >
+      <Header
+        style={{
+          backgroundColor: "#202429",
+          borderBottom: "1px solid #212540",
+          
+        }}
+      >
+        {/* <Row justify={"center"} align={"middle"}> */}
+          <Col
+            span={24}
+            style={{ display: "flex", justifyContent: "flex-end" }}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="m19.5 8.25-7.5 7.5-7.5-7.5"
-            />
-          </svg>
-        </div>
-
-        {allMessages.length > 0 ? (
-          <div className={styles.messages}>
-            {allMessages.map((msg, index) => {
-              return (
-                <div key={index} className={styles.message}>
-                  <Image
-                    src={msg.role === "user" ? nouserlogo : Logo}
-                    width={50}
-                    height={50}
-                    alt=""
-                  />
-                  <div className={styles.details}>
-                    <h2>{msg.role === "user" ? "You" : "Spotcheck Bot"}</h2>
-                    <p>{msg.content}</p>{" "}
-                    {/* Access the text property of the content object */}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div className={styles.nochat}>
-            <div className={styles.s1}>
-              <h1>How can I help you today?</h1>
-            </div>
-            <div className={styles.s2}>
-              <div className={styles.suggestioncard}>
-                <h2>Recommend activities</h2>
-                <p>psychology behind decision-making</p>
-              </div>
-              <div className={styles.suggestioncard}>
-                <h2>Recommend activities</h2>
-                <p>psychology behind decision-making</p>
-              </div>
-              <div className={styles.suggestioncard}>
-                <h2>Recommend activities</h2>
-                <p>psychology behind decision-making</p>
-              </div>
-              <div className={styles.suggestioncard}>
-                <h2>Recommend activities</h2>
-                <p>psychology behind decision-making</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className={styles.bottomsection}>
-          <div className={styles.messagebar}>
-            <input
-              type="text"
-              placeholder="Message Spotcheck Bot..."
-              onChange={(e) => setMessage(e.target.value)}
-              value={message}
-            />
-
-            {!isSending ? (
-              <svg
-                onClick={sendMessage}
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-6 h-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18"
-                />
-              </svg>
+            <AgentImageComponent />
+          </Col>
+        {/* </Row> */}
+      </Header>
+      <Content>
+        <Row
+          style={{
+            marginTop: 35,
+          }}
+        >
+          <Col span={24}>
+            {allMessages.length > 0 ? (
+              <List
+                itemLayout="horizontal"
+                dataSource={allMessages}
+                renderItem={(msg, index) => (
+                  <List.Item key={index}>
+                    <List.Item.Meta
+                      avatar={
+                        <Avatar src={msg.role === "user" ? nouserlogo : Logo} />
+                      }
+                      title={
+                        <strong>
+                          {msg.role === "user" ? "You" : msg.role}
+                        </strong>
+                      }
+                      description={msg.content}
+                    />
+                  </List.Item>
+                )}
+              />
             ) : (
-              <HashLoader color="#36d7b7" size={30} />
+              <Row style={{ textAlign: "center", marginTop: 50 }}>
+                <Col span={24}>
+                  <LogoComponent height={100} />
+                </Col>
+                {/* Adjust width and height as needed */}
+                <Col span={24}>
+                  <Typography.Title
+                    style={{
+                      color: "#FFFFFF",
+                      textAlign: "center",
+                      fontSize: "36px",
+                    }}
+                  >
+                    Welcome to Content AI
+                  </Typography.Title>
+                </Col>
+                <Col span={24}>
+                  <Row>
+                    <Col span={7}></Col>
+                    <Col
+                      span={10}
+                      style={{
+                        alignContent: "center",
+                        textAlign: "center",
+                      }}
+                    >
+                      <Typography
+                        style={{
+                          color: "#FFFFFF",
+                          fontSize: "14px",
+                          lineHeight: "21px",
+                        }}
+                      >
+                        Unlock your creative potential with our powerful content
+                        creation tool—designed to streamline your workflow,
+                        enhance your storytelling, and bring your ideas to life
+                        across any platform.
+                      </Typography>
+                    </Col>
+                    <Col span={7}></Col>
+                  </Row>
+                </Col>
+                <Col span={24} style={{ marginTop: 20 }}>
+                  <Typography.Title
+                    style={{
+                      color: "#3F5DFF",
+                      textAlign: "center",
+                      fontSize: "24px",
+                      fontWeight: 400,
+                      lineHeight: "36px",
+                    }}
+                  >
+                    # Get the topic
+                  </Typography.Title>
+                </Col>
+                <Col span={24} style={{ marginTop: 10 }}>
+                  <Typography.Title
+                    style={{
+                      color: "#3F5DFF",
+                      textAlign: "center",
+                      fontSize: "24px",
+                      fontWeight: 400,
+                      lineHeight: "36px",
+                    }}
+                  >
+                    # Content Creation
+                  </Typography.Title>
+                </Col>
+                <Col span={24} style={{ marginTop: 10 }}>
+                  <Typography.Title
+                    style={{
+                      color: "#3F5DFF",
+                      textAlign: "center",
+                      fontSize: "24px",
+                      fontWeight: 400,
+                      lineHeight: "36px",
+                    }}
+                  >
+                    # Image Generation
+                  </Typography.Title>
+                </Col>
+              </Row>
             )}
-          </div>
-          <p>
-            Spotcheck Bot can make mistakes. Consider checking important
-            information.
-          </p>
-        </div>
-      </div>
-    </div>
+          </Col>
+        </Row>
+      </Content>
+      <Footer style={{ backgroundColor: "#202429", borderRadius: "14px" }}>
+        <>
+          <Col
+            span={24}
+            style={{ padding: "10px 0", display: "flex", alignItems: "center" }}
+          >
+            <TextArea
+              placeholder="Create Content"
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={handleKeyPress}
+              value={messageC}
+              autoSize
+              style={{
+                backgroundColor: "transparent",
+                color: "white",
+                flex: 1,
+                borderRadius: "87px",
+                border: "2px solid #9194A0",
+              }}
+            />
+            {!isSending ? (
+              <Button
+                size={"large"}
+                type="primary"
+                shape="circle"
+                icon={<SendLogoComponent />} // Use your imported SVG here
+                onClick={contentStrategist}
+                style={{ marginLeft: 10 }}
+              />
+            ) : (
+              <Spin style={{ marginLeft: 10 }} />
+            )}
+          </Col>
+        </>
+      </Footer>
+    </Layout>
   );
 };
 

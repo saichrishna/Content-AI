@@ -116,7 +116,7 @@
 }
 
 .bottomsection .messagebar {
-  border: 1px solid gray;
+  /* border: 1px solid gray; */
   align-items: center;
   display: flex;
   padding: 15px;
@@ -169,11 +169,18 @@
 
 .messages .message div p {
   color: var(--textcol);
-  font-size: 15px;
+  font-size: 18px;
   max-width: 1000px;
-  font-family: monospace;
 }
 
 .bottomsection p {
   color: #e73137;
+}
+
+textarea.ant-input.css-dev-only-do-not-override-kghr11.ant-input-outlined {
+  background-color: transparent !important;
+}
+
+.ant-input-outlined {
+  background-color: transparent !important;
 }

@@ -6,7 +6,8 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "CHATGPT-UWin Bot",
-  description: "I am the Spotcheck Bot. Ask me anything regarding procurement, purchase, and logistics.",
+  description:
+    "I am the Spotcheck Bot. Ask me anything regarding procurement, purchase, and logistics.",
 };
 
 export default function RootLayout({
@@ -16,6 +17,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body className={inter.className}>{children}</body>
     </html>
   );
