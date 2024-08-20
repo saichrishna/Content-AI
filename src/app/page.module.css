@@ -9,14 +9,11 @@
   background-color: black;
 }
 
-.leftOut{
-  /* background-color: red; */
-  width: 20%;
+.leftOut {
+  height: 100vh;
   overflow: hidden;
 }
-.rightOut{
-  /* background-color: blue; */
-  width: 80%;
-  
-  overflow: hidden;
+.rightOut {
+  height: 100vh;
+  overflow-y: auto;
 }

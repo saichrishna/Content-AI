@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "@/styles/RightSection.module.css";
 import nouserlogo from "@/assets/nouserlogo.png";
 import { HashLoader } from "react-spinners";
@@ -12,9 +12,10 @@ const { Paragraph } = Typography;
 import SendLogoComponent from "../assets/sendLogo.svg"; // Adjust the path as necessary
 import LogoComponent from "../assets/Logo.svg"; // Adjust the path as necessary
 import AgentImageComponent from "../assets/Agent.svg"; // Adjust the path as necessary
-import { flightRouterStateSchema } from "next/dist/server/app-render/types";
+import AILogoComponent from "../assets/AgentMessageIcon.svg"; // Adjust the path as necessary
 
 const RightSection = () => {
+  const messagesEndRef = useRef(null);
   const [messageC, setMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [allMessages, setAllMessages] = useState<any[]>([]);
@@ -67,6 +68,7 @@ const RightSection = () => {
   }, [allMessages]);
 
   useEffect(() => {
+    // scrollToBottom();
     let index = latestMessageIndex;
     if (latestMessageIndex > 0 && latestMessage.length > 0) {
       setAllMessages((prevMessages) => {
@@ -136,17 +138,22 @@ const RightSection = () => {
                   content: (
                     <>
                       <Row>
-                        Unable to retrieve data trends from provider.Do you wish
-                        to proceed with the lead?{" "}
+                        <Typography className={styles.messageAppearance}>
+                          Unable to retrieve data trends from provider.Do you
+                          wish to proceed with the lead?
+                        </Typography>
                       </Row>
                       <Row>
-                        <Col span={12}>
-                          <Button onClick={() => selectTopic(messageC)}>
+                        <Col span={4} style={{ padding: 10 }}>
+                          <Button
+                            type="primary"
+                            onClick={() => selectTopic(messageC)}
+                          >
                             Yes
                           </Button>
                         </Col>
-                        <Col span={12}>
-                          <Button>No</Button>
+                        <Col span={2} style={{ padding: 10 }}>
+                          <Button type="primary">No</Button>
                         </Col>
                       </Row>
                     </>
@@ -166,36 +173,41 @@ const RightSection = () => {
                 {
                   content: (
                     <>
-                      {/* return ( */}
-                      Here are the current trends, please select one topic to
-                      proceed further.
+                      <Typography className={styles.messageAppearance}>
+                        Here are the current trends, please select one topic to
+                        proceed further.
+                      </Typography>
                       <div>
-                        Below are Top Trends:
-                        <ul>
-                          {topTrends.map((item: any, index: any) => (
-                            <li
-                              style={{ cursor: "pointer" }}
-                              onClick={() => selectTopic(item.query)}
-                              key={index}
-                            >
-                              {item.query}
-                            </li>
-                          ))}
-                        </ul>
+                        <Typography className={styles.messageAppearance}>
+                          Below are Top Trends:
+                          <ul>
+                            {topTrends.map((item: any, index: any) => (
+                              <li
+                                style={{ cursor: "pointer" }}
+                                onClick={() => selectTopic(item.query)}
+                                key={index}
+                              >
+                                {item.query}
+                              </li>
+                            ))}
+                          </ul>
+                        </Typography>
                       </div>
                       <div>
-                        Below are Rising Trends:
-                        <ul>
-                          {risingTrends.map((item: any, index: any) => (
-                            <li
-                              style={{ cursor: "pointer" }}
-                              onClick={() => selectTopic(item.query)}
-                              key={index}
-                            >
-                              {item.query}
-                            </li>
-                          ))}
-                        </ul>
+                        <Typography className={styles.messageAppearance}>
+                          Below are Rising Trends:
+                          <ul>
+                            {risingTrends.map((item: any, index: any) => (
+                              <li
+                                style={{ cursor: "pointer" }}
+                                onClick={() => selectTopic(item.query)}
+                                key={index}
+                              >
+                                {item.query}
+                              </li>
+                            ))}
+                          </ul>
+                        </Typography>
                       </div>
                       {/* ) */}
                     </>
@@ -282,7 +294,9 @@ const RightSection = () => {
             content: (
               <>
                 <Row>
-                  Do you wish to pass above content for Review AI Agent?{" "}
+                  <Typography className={styles.messageAppearance}>
+                    Do you wish to pass above content for Review AI Agent?{" "}
+                  </Typography>
                 </Row>
                 <Row>
                   <Col span={12}>
@@ -416,7 +430,6 @@ const RightSection = () => {
       errorHandling(response.statusText);
       throw new Error(`Network response was not ok: ${response.statusText}`);
     }
-    debugger;
     const result = await response.json();
     if (result.isApproved) {
       setAllMessages((prevMessages) => [
@@ -516,13 +529,17 @@ const RightSection = () => {
           {
             content: (
               <>
-                <Row>Do you wish to proceed with above prompt? </Row>
+                <Row>
+                  <Typography className={styles.messageAppearance}>
+                    Do you wish to proceed with above prompt?
+                  </Typography>
+                </Row>
                 <Row>
                   <Col span={12}>
-                    <Button>Yes</Button>
+                    <Button type="primary">Yes</Button>
                   </Col>
                   <Col span={12}>
-                    <Button>No</Button>
+                    <Button type="primary">No</Button>
                   </Col>
                 </Row>
               </>
@@ -538,6 +555,12 @@ const RightSection = () => {
       setIsSending(false);
     }
   };
+
+  // const scrollToBottom = () => {
+  //   if (messagesEndRef.current) {
+  //     messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+  //   }
+  // };
 
   return (
     // <div className={styles.rightSection}>
@@ -655,19 +678,24 @@ const RightSection = () => {
         style={{
           backgroundColor: "#202429",
           borderBottom: "1px solid #212540",
-          
+          borderRadius: "14px !important",
         }}
       >
         {/* <Row justify={"center"} align={"middle"}> */}
-          <Col
-            span={24}
-            style={{ display: "flex", justifyContent: "flex-end" }}
-          >
-            <AgentImageComponent />
-          </Col>
+        <Col
+          span={24}
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginTop: "20px",
+            cursor: "pointer",
+          }}
+        >
+          <AgentImageComponent />
+        </Col>
         {/* </Row> */}
       </Header>
-      <Content>
+      <Content ref={messagesEndRef} style={{ overflow: "auto" }}>
         <Row
           style={{
             marginTop: 35,
@@ -678,19 +706,68 @@ const RightSection = () => {
               <List
                 itemLayout="horizontal"
                 dataSource={allMessages}
+                style={{ padding: 20 }}
                 renderItem={(msg, index) => (
-                  <List.Item key={index}>
-                    <List.Item.Meta
-                      avatar={
-                        <Avatar src={msg.role === "user" ? nouserlogo : Logo} />
-                      }
-                      title={
-                        <strong>
-                          {msg.role === "user" ? "You" : msg.role}
-                        </strong>
-                      }
-                      description={msg.content}
-                    />
+                  <List.Item
+                    key={index}
+                    style={{
+                      display: "flex",
+                      justifyContent:
+                        msg.role === "user" ? "flex-end" : "flex-start",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "50%",
+                        padding:
+                          msg.role === "user" ? "0 0 0 10px" : "0 10px 0 0", // Padding to avoid overlap with the screen edge
+                        textAlign: msg.role === "user" ? "right" : "left",
+                      }}
+                    >
+                      <List.Item.Meta
+                        avatar={
+                          msg.role === "user" ? null : <AILogoComponent />
+                        }
+                        title={
+                          <strong>
+                            {msg.role === "user" ? null : (
+                              <Typography
+                                style={{
+                                  color: "#9194A0",
+                                  fontSize: "18px",
+                                  fontWeight: 400,
+                                  lineHeight: "27px",
+                                }}
+                              >
+                                {msg.role}
+                              </Typography>
+                            )}
+                          </strong>
+                        }
+                        description={
+                          <Typography
+                            style={{
+                              color: "#FFFFFF",
+                              fontWeight: 400,
+                              fontSize: "18px",
+                              lineHeight: "27px",
+                              borderRadius: "15px", // Rounded corners for user messages
+                              whiteSpace: "normal", // Ensures the text wraps normally
+                              wordBreak: "break-word", // Prevents long words from overflowing
+                              display: "inline-block", // Ensures block-level display for normal text flow
+                              backgroundColor:
+                                msg.role === "user" ? "#444C9B" : "transparent", // Blue background for user messages
+                              padding:
+                                msg.role === "user"
+                                  ? "10px 20px 10px 20px"
+                                  : "0px", // Padding inside the message bubble
+                            }}
+                          >
+                            {msg.content}
+                          </Typography>
+                        }
+                      />
+                    </div>
                   </List.Item>
                 )}
               />
@@ -737,7 +814,7 @@ const RightSection = () => {
                     <Col span={7}></Col>
                   </Row>
                 </Col>
-                <Col span={24} style={{ marginTop: 20 }}>
+                <Col span={24} style={{ marginTop: 20, cursor: "pointer" }}>
                   <Typography.Title
                     style={{
                       color: "#3F5DFF",
@@ -750,7 +827,7 @@ const RightSection = () => {
                     # Get the topic
                   </Typography.Title>
                 </Col>
-                <Col span={24} style={{ marginTop: 10 }}>
+                <Col span={24} style={{ marginTop: 10, cursor: "pointer" }}>
                   <Typography.Title
                     style={{
                       color: "#3F5DFF",
@@ -763,7 +840,7 @@ const RightSection = () => {
                     # Content Creation
                   </Typography.Title>
                 </Col>
-                <Col span={24} style={{ marginTop: 10 }}>
+                <Col span={24} style={{ marginTop: 10, cursor: "pointer" }}>
                   <Typography.Title
                     style={{
                       color: "#3F5DFF",

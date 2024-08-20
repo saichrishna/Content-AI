@@ -173,6 +173,18 @@
   max-width: 1000px;
 }
 
+.messageAppearance {
+  color: #FFFFFF;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 27px;
+  border-radius: 15px;
+  white-space: normal;
+  word-break: break-word;
+  display: inline-block;
+  background-color: transparent;
+}
+
 .bottomsection p {
   color: #e73137;
 }

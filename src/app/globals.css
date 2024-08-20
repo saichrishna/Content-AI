@@ -27,3 +27,38 @@ body {
 .ant-typography {
   font-family: "Poppins", sans-serif;
 }
+
+/* For WebKit browsers (Chrome, Safari) */
+::-webkit-scrollbar {
+  width: 8px; /* Adjust the width of the scrollbar */
+  height: 8px; /* Adjust the height of the scrollbar */
+}
+
+::-webkit-scrollbar-track {
+  background: transparent; /* Make the track transparent */
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1); /* Transparent thumb, adjust the opacity as needed */
+  border-radius: 4px; /* Round the scrollbar thumb */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2); /* Slightly darker on hover */
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin; /* Make scrollbar thinner */
+  scrollbar-color: rgba(0, 0, 0, 0.1) transparent; /* Transparent track with a light thumb */
+}
+
+/* For Edge and IE */
+.scrollable-section {
+  -ms-overflow-style: none; /* Hide the scrollbar for Internet Explorer and Edge */
+}
+
+.scrollable-section::-ms-scrollbar {
+  display: none; /* Hide scrollbar for Internet Explorer and Edge */
+}
+

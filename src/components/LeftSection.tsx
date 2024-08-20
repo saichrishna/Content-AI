@@ -1,13 +1,8 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import SpotcheckLogo from "@/assets/SpotcheckLogo.svg";
-import nouserlogo from "@/assets/nouserlogo.png";
-import Image from "next/image";
+import AddIconComponent from "@/assets/AddIcon.svg";
 import { Layout, Avatar, Typography, Button, Row, Col } from "antd";
-import { EditOutlined } from "@ant-design/icons";
 import { Header } from "antd/es/layout/layout";
-const { Sider } = Layout;
-const { Paragraph } = Typography;
 
 const LeftSection = () => {
   const allChats = [
@@ -36,9 +31,9 @@ const LeftSection = () => {
     <Layout
       style={{
         backgroundColor: "#202429",
-        borderRadius: "14px",
         height: "95%",
         marginTop: "30px",
+        borderRadius: "14px !important",
       }}
     >
       {" "}
@@ -46,8 +41,31 @@ const LeftSection = () => {
         style={{
           backgroundColor: "#202429",
           borderBottom: "1px solid #212540",
+          padding: "20px 10px 20px 10px",
+          borderRadius: "14px !important",
         }}
-      ></Header>
+      >
+        <Row>
+          <Col span={24}>
+            <Row>
+              <Col span={20}>
+                <Typography
+                  style={{
+                    fontWeight: 600,
+                    fontSize: "20px",
+                    color: "#FFFFFF",
+                  }}
+                >
+                  Contents
+                </Typography>
+              </Col>
+              <Col span={4} style={{ cursor: "pointer" }}>
+                <AddIconComponent />
+              </Col>
+            </Row>
+          </Col>
+        </Row>
+      </Header>
     </Layout>
   );
 };

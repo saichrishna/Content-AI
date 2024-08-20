@@ -10,12 +10,16 @@ export default function Home() {
     <Row
       gutter={[10, 0]}
       className={styles.mainpage}
-      style={{ backgroundColor: "#292D32" }}
+      style={{
+        backgroundColor: "#292D32",
+        height: "100vh",
+        overflow: "hidden",
+      }}
     >
-      <Col span={1} className={styles.leftOut}>
+      <Col span={2} className={styles.leftOut}>
         <SiderSection />
       </Col>
-      <Col span={5} className={styles.leftOut}>
+      <Col span={4} className={styles.leftOut}>
         <LeftSection />
       </Col>
       <Col span={18} className={styles.rightOut}>
