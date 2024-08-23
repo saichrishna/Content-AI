@@ -32,6 +32,7 @@ const RightSection = () => {
   const [content, setContent] = useState("");
   const [errorMessage, setErrorMessage] = useState(""); // State for error message
   const [manualLead, setManuallead] = useState(false);
+  const [image, setImage] = useState("");
 
   const handleKeyPress = (e) => {
     if (e.key === "Enter") {
@@ -115,7 +116,8 @@ const RightSection = () => {
       };
       setLoading(true);
       const response = await fetch(
-        "http://localhost:3000/api/v1/prediction/907e40af-f770-4238-bbb4-a5feb839d3df",
+        // "http://localhost:3000/api/v1/prediction/907e40af-f770-4238-bbb4-a5feb839d3df",
+        "http://localhost:3000/api/v1/prediction/927cb193-a89b-446f-aad5-9f9d119db54d",
         {
           method: "POST",
           headers: {
@@ -130,103 +132,161 @@ const RightSection = () => {
       }
       const result = await response.json();
       if (result.chatMessageId.length > 0) {
-        result.agentReasoning.map((item: any) => {
-          if (item.agentName === "Supervisor") {
-          } else {
-            // var trends = {};
-            const summary = JSON.parse(item.usedTools[0].toolOutput);
-            if (summary === "Data not found.!") {
-              setAllMessages((prevMessages) => [
-                ...prevMessages,
-                {
-                  content: (
-                    <>
-                      <Row>
-                        <Typography className={styles.messageAppearance}>
-                          Unable to retrieve data trends from provider.Do you
-                          wish to proceed with the lead?
-                        </Typography>
-                      </Row>
-                      <Row>
-                        <Col span={4} style={{ padding: 10 }}>
-                          <Button
-                            type="primary"
-                            onClick={() => selectTopic(messageC)}
-                          >
-                            Yes
-                          </Button>
-                        </Col>
-                        <Col span={2} style={{ padding: 10 }}>
-                          <Button type="primary">No</Button>
-                        </Col>
-                      </Row>
-                    </>
-                  ),
-                  role: item.agentName,
-                },
-              ]);
-              return;
-            } else {
-              const trends = summary[messageC];
-              const topTrends = trends.top;
-              // const topTrends = trends.top;
-              const risingTrends = trends.rising;
-              // topicList = Object.values(trends);
-              setAllMessages((prevMessages) => [
-                ...prevMessages,
-                {
-                  content: (
-                    <>
-                      <Typography className={styles.messageAppearance}>
-                        Here are the current trends, please select one topic to
-                        proceed further.
-                      </Typography>
-                      <div>
-                        <Typography className={styles.messageAppearance}>
-                          Below are Top Trends:
-                          <ul>
-                            {topTrends.map((item: any, index: any) => (
-                              <li
-                                style={{ cursor: "pointer" }}
-                                onClick={() => selectTopic(item.query)}
-                                key={index}
-                              >
-                                {item.query}
-                              </li>
-                            ))}
-                          </ul>
-                        </Typography>
-                      </div>
-                      <div>
-                        <Typography className={styles.messageAppearance}>
-                          Below are Rising Trends:
-                          <ul>
-                            {risingTrends.map((item: any, index: any) => (
-                              <li
-                                style={{ cursor: "pointer" }}
-                                onClick={() => selectTopic(item.query)}
-                                key={index}
-                              >
-                                {item.query}
-                              </li>
-                            ))}
-                          </ul>
-                        </Typography>
-                      </div>
-                      {/* ) */}
-                    </>
-                  ),
-                  role: item.agentName,
-                },
-              ]);
-              return;
-            }
-          }
-        });
+        const filterSupervisorMessages = result.agentReasoning.filter(
+          (item: any) => item.agentName !== "Supervisor"
+        );
+        const summary = JSON.parse(filterSupervisorMessages[0].messages[0]);
+        // result.agentReasoning.map((item: any) => {
+        //   if (item.agentName === "Supervisor") {
+        //   } else {
+        //     debugger;
+        //     // var trends = {};
+        //     // const summary = JSON.parse(item.usedTools[0].toolOutput);
+        //     const summary = JSON.parse(item.messages[0]);
+        //     if (summary === "Data not found.!") {
+        //       setAllMessages((prevMessages) => [
+        //         ...prevMessages,
+        //         {
+        //           content: (
+        //             <>
+        //               <Row>
+        //                 <Typography className={styles.messageAppearance}>
+        //                   Unable to retrieve data trends from provider.Do you
+        //                   wish to proceed with the lead?
+        //                 </Typography>
+        //               </Row>
+        //               <Row>
+        //                 <Col span={4} style={{ padding: 10 }}>
+        //                   <Button
+        //                     type="primary"
+        //                     onClick={() => selectTopic(messageC)}
+        //                   >
+        //                     Yes
+        //                   </Button>
+        //                 </Col>
+        //                 <Col span={2} style={{ padding: 10 }}>
+        //                   <Button type="primary">No</Button>
+        //                 </Col>
+        //               </Row>
+        //             </>
+        //           ),
+        //           role: item.agentName,
+        //         },
+        //       ]);
+        //       return;
+        //     } else {
+        //       // const trends =
+        //       //   summary["parent"]["top_and_trending"]["related_queries"];
+        //       // const topTrends = trends.top;
+        //       // const topTrends = trends.top;
+        //       // const risingTrends = trends.rising;
+        //       // topicList = Object.values(trends);
+        setAllMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            content: (
+              <>
+                <Typography className={styles.messageAppearance}>
+                  Here are the current trends, please select one topic to
+                  proceed further.
+                </Typography>
+                <div>
+                  <Typography className={styles.messageAppearance}>
+                    <ul>
+                      {/* {topTrends.map((item: any, index: any) => ( */}
+                      {summary.map((item: any, index: any) => (
+                        <li
+                          style={{
+                            color: "#3F5DFF",
+                            cursor: "pointer",
+                          }} // onClick={() => selectTopic(item.query)}
+                          onClick={() => selectTopic(item)}
+                          key={index}
+                        >
+                          {/* {item.query} */}
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </Typography>
+                </div>
+                {/* <div>
+        //                 <Typography className={styles.messageAppearance}>
+        //                   Below are Rising Trends:
+        //                   <ul>
+        //                     {risingTrends.map((item: any, index: any) => (
+        //                       <li
+        //                         style={{ cursor: "pointer" }}
+        //                         onClick={() => selectTopic(item.query)}
+        //                         key={index}
+        //                       >
+        //                         {item.query}
+        //                       </li>
+        //                     ))}
+        //                   </ul>
+        //                 </Typography>
+                      </div> */}
+                {/* ) */}
+              </>
+            ),
+            role: filterSupervisorMessages.agentName,
+          },
+        ]);
+        setMessage("");
+
+        return;
       }
-      setMessage("");
     } catch (error) {
-      setErrorMessage("An error occurred. Please try again later.");
+      setAllMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          content: (
+            <>
+              <Row>
+                <Typography className={styles.messageAppearance}>
+                  Unable to retrieve data trends from provider.Do you wish to
+                  proceed with the lead?
+                </Typography>
+              </Row>
+              <Row>
+                <Col span={24}>
+                  <Row>
+                    <Col span={4} style={{ padding: 10 }}>
+                      <Button
+                        type="primary"
+                        onClick={() => selectTopic(messageC)}
+                      >
+                        <Typography className={styles.messageAppearance}>
+                          Yes
+                        </Typography>
+                      </Button>
+                    </Col>
+                    <Col span={4} style={{ padding: 10 }}>
+                      <Button type="primary">
+                        <Typography className={styles.messageAppearance}>
+                          No
+                        </Typography>
+                      </Button>
+                    </Col>
+                  </Row>
+                </Col>
+                <Col span={4} style={{ padding: 10 }}>
+                  <Button type="primary" onClick={() => selectTopic(messageC)}>
+                    <Typography className={styles.messageAppearance}>
+                      Yes
+                    </Typography>
+                  </Button>
+                </Col>
+                <Col span={4} style={{ padding: 10 }}>
+                  <Button type="primary">No</Button>
+                </Col>
+              </Row>
+            </>
+          ),
+          role: "Content Strategist",
+        },
+      ]);
+      // setErrorMessage("An error occurred. Please try again later.");
     } finally {
       setIsSending(false);
       setLoading(false);
@@ -239,11 +299,75 @@ const RightSection = () => {
   };
 
   const selectPrompt = async (prompt: string) => {
-    setPrompt(prompt);
+    if (prompt.includes("Prompt:")) {
+      // Split the string at "**Prompt**:" and take the part after it
+      const trimmedPrompt = prompt.split("Prompt:")[1].trim();
+      setPrompt(trimmedPrompt);
+      return;
+    } else if (prompt.includes("Improved Prompt:")) {
+      // Split the string at "**Prompt**:" and take the part after it
+      const trimmedPrompt = prompt.split("Improved Prompt:")[1].trim();
+      setPrompt(trimmedPrompt);
+      return;
+    } else if (prompt.includes("improved prompt:")) {
+      // Split the string at "**Prompt**:" and take the part after it
+      const trimmedPrompt = prompt.split("improved prompt:")[1].trim();
+      setPrompt(trimmedPrompt);
+      return;
+    } else if (prompt.includes("prompt:")) {
+      // Split the string at "**Prompt**:" and take the part after it
+      const trimmedPrompt = prompt.split("prompt:")[1].trim();
+      setPrompt(trimmedPrompt);
+      return;
+    } else if (prompt.includes("**Improved Prompt**:")) {
+      // Split the string at "**Prompt**:" and take the part after it
+      const trimmedPrompt = prompt.split("**Improved Prompt**:")[1].trim();
+      setPrompt(trimmedPrompt);
+      return;
+    } else if (prompt.includes("**Prompt**:")) {
+      // Split the string at "**Prompt**:" and take the part after it
+      const trimmedPrompt = prompt.split("**Prompt**:")[1].trim();
+      setPrompt(trimmedPrompt);
+      return;
+    } else if (prompt.includes("**Output Format**:")) {
+      // Split the string at "**Prompt**:" and take the part after it
+      const trimmedPrompt = prompt.split("**Output Format**:")[1].trim();
+      setPrompt(trimmedPrompt);
+      return;
+    } else if (prompt.includes("Output Format:")) {
+      // Split the string at "**Prompt**:" and take the part after it
+      const trimmedPrompt = prompt.split("Output Format:")[1].trim();
+      setPrompt(trimmedPrompt);
+      return;
+    } else {
+      setPrompt(prompt);
+    }
   };
 
   const selectContent = async (content: string) => {
-    setContent(content);
+    if (content.includes("**Revised Content:**")) {
+      // Split the string at "**Prompt**:" and take the part after it
+      const trimmedContent = prompt.split("**Revised Content:**")[1].trim();
+      setContent(trimmedContent);
+      return;
+    } else if (content.includes("Revised Content:")) {
+      // Split the string at "**Prompt**:" and take the part after it
+      const trimmedContent = prompt.split("Revised Content:")[1].trim();
+      setContent(trimmedContent);
+      return;
+    } else if (content.includes("Content:")) {
+      // Split the string at "**Prompt**:" and take the part after it
+      const trimmedContent = prompt.split("Content:")[1].trim();
+      setContent(trimmedContent);
+      return;
+    } else if (content.includes("**Content:**")) {
+      // Split the string at "**Prompt**:" and take the part after it
+      const trimmedContent = prompt.split("**Content:**")[1].trim();
+      setContent(trimmedContent);
+      return;
+    } else {
+      setContent(content);
+    }
     // setNext("imageGenerator");
     // setNext("contentReviewer");
   };
@@ -275,11 +399,9 @@ const RightSection = () => {
       const result = await response.json();
       if (result.chatMessageId.length > 0) {
         const filterSupervisorMessages = result.agentReasoning.filter(
-          (item: any) => item.agentName !== "Supervisor"
+          (item: any) => item.agentName === "Content Generator"
         );
-        const lastMessage =
-          filterSupervisorMessages[filterSupervisorMessages.length - 1]
-            .messages[0];
+        const lastMessage = filterSupervisorMessages[0].messages[0];
         selectContent(lastMessage);
         result.agentReasoning.map((item: any) => {
           if (item.agentName === "Supervisor") {
@@ -288,7 +410,7 @@ const RightSection = () => {
             setAllMessages((prevMessages) => [
               ...prevMessages,
               {
-                content: lastMessage,
+                content: item.messages[0],
                 role: item.agentName,
               },
             ]);
@@ -301,20 +423,30 @@ const RightSection = () => {
               <>
                 <Row>
                   <Typography className={styles.messageAppearance}>
-                    Do you wish to proceed to generate Images for content?{" "}
+                    Do you wish to proceed to generate Images for content?
                   </Typography>
                 </Row>
                 <Row>
-                  <Col span={12}>
-                    <Button
-                      type="primary"
-                      onClick={() => setNext("imageGenerator")}
-                    >
-                      Yes
-                    </Button>
-                  </Col>
-                  <Col span={12}>
-                    <Button>No</Button>
+                  <Col span={24}>
+                    <Row>
+                      <Col span={4} style={{ padding: 10 }}>
+                        <Button
+                          type="primary"
+                          onClick={() => setNext("imageGenerator")}
+                        >
+                          <Typography className={styles.messageAppearance}>
+                            Yes
+                          </Typography>
+                        </Button>
+                      </Col>
+                      <Col span={4} style={{ padding: 10 }}>
+                        <Button type="primary">
+                          <Typography className={styles.messageAppearance}>
+                            No
+                          </Typography>
+                        </Button>
+                      </Col>
+                    </Row>
                   </Col>
                 </Row>
               </>
@@ -367,16 +499,26 @@ const RightSection = () => {
                   </Typography>
                 </Row>
                 <Row>
-                  <Col span={12}>
-                    <Button
-                      type="primary"
-                      onClick={() => marketingLeadApproval()}
-                    >
-                      Yes
-                    </Button>
-                  </Col>
-                  <Col span={12}>
-                    <Button type="primary">No</Button>
+                  <Col span={24}>
+                    <Row>
+                      <Col span={4} style={{ padding: 10 }}>
+                        <Button
+                          type="primary"
+                          onClick={() => marketingLeadApproval()}
+                        >
+                          <Typography className={styles.messageAppearance}>
+                            Yes
+                          </Typography>
+                        </Button>
+                      </Col>
+                      <Col span={4} style={{ padding: 10 }}>
+                        <Button type="primary">
+                          <Typography className={styles.messageAppearance}>
+                            No
+                          </Typography>
+                        </Button>
+                      </Col>
+                    </Row>
                   </Col>
                 </Row>
               </>
@@ -390,10 +532,7 @@ const RightSection = () => {
         const filterSupervisorMessages = result.agentReasoning.filter(
           (item: any) => item.agentName !== "Supervisor"
         );
-        const lastMessage =
-          filterSupervisorMessages[filterSupervisorMessages.length - 1]
-            .messages[0];
-        // selectContent(lastMessage);
+        selectContent(result.text);
         result.agentReasoning.map((item: any) => {
           if (item.agentName === "Supervisor") {
             return;
@@ -401,7 +540,7 @@ const RightSection = () => {
             setAllMessages((prevMessages) => [
               ...prevMessages,
               {
-                content: lastMessage,
+                content: item.messages[0],
                 role: item.agentName,
               },
             ]);
@@ -419,7 +558,28 @@ const RightSection = () => {
                   </Typography>
                 </Row>
                 <Row>
-                  <Col span={12}>
+                  <Col span={24}>
+                    <Row>
+                      <Col span={4} style={{ padding: 10 }}>
+                        <Button
+                          type="primary"
+                          onClick={() => marketingLeadApproval()}
+                        >
+                          <Typography className={styles.messageAppearance}>
+                            Yes
+                          </Typography>
+                        </Button>
+                      </Col>
+                      <Col span={4} style={{ padding: 10 }}>
+                        <Button type="primary">
+                          <Typography className={styles.messageAppearance}>
+                            No
+                          </Typography>
+                        </Button>
+                      </Col>
+                    </Row>
+                  </Col>
+                  {/* <Col span={4} style={{ padding: 10 }}>
                     <Button
                       type="primary"
                       onClick={() => marketingLeadApproval()}
@@ -427,9 +587,9 @@ const RightSection = () => {
                       Yes
                     </Button>
                   </Col>
-                  <Col span={12}>
+                  <Col span={2} style={{ padding: 10 }}>
                     <Button type="primary">No</Button>
-                  </Col>
+                  </Col> */}
                 </Row>
               </>
             ),
@@ -448,10 +608,10 @@ const RightSection = () => {
 
   const postContent = async () => {
     const reqBody = {
-      Post_Type: 1920078,
+      Post_Type: 1920079,
       Post_Content: content,
       Schedule: "2024-01-01T12:00:00Z",
-      Image_URL: "",
+      Image_URL: image,
       Status: 1920104,
     };
     const response = await fetch(
@@ -506,20 +666,25 @@ const RightSection = () => {
     }
   };
 
+  const selectImage = async (imageURL: string) => {
+    setImage(imageURL);
+    setNext("contentReviewer");
+  };
+
   const generateImages = async () => {
     try {
-      const data = new FormData();
-      data.append("pipeline_name", "Image Generator Pipeline");
-      data.append("username", "avinashng");
-      data.append("inputs", topic);
+      const requestBody = {
+        question: topic,
+      };
+      setLoading(true);
       const response = await fetch(
-        "https://api.vectorshift.ai/api/pipelines/run%22",
+        "http://localhost:3000/api/v1/prediction/f3c22dfd-8883-448f-ad44-90e1dd3325d0",
         {
           method: "POST",
           headers: {
-            "Api-Key": "sk_I4xIB5vdJQ1xqVchUGQcDscFE23bu8gg9bwHP4r4Z05QAQJS",
+            "Content-Type": "application/json",
           },
-          body: data,
+          body: JSON.stringify(requestBody),
         }
       );
       if (!response.ok) {
@@ -535,16 +700,26 @@ const RightSection = () => {
                   </Typography>
                 </Row>
                 <Row>
-                  <Col span={12}>
-                    <Button
-                      type="primary"
-                      onClick={() => setNext("contentReviewer")}
-                    >
-                      Yes
-                    </Button>
-                  </Col>
-                  <Col span={12}>
-                    <Button type="primary">No</Button>
+                  <Col span={24}>
+                    <Row>
+                      <Col span={4} style={{ padding: 10 }}>
+                        <Button
+                          type="primary"
+                          onClick={() => setNext("contentReviewer")}
+                        >
+                          <Typography className={styles.messageAppearance}>
+                            Yes
+                          </Typography>
+                        </Button>
+                      </Col>
+                      <Col span={4} style={{ padding: 10 }}>
+                        <Button type="primary">
+                          <Typography className={styles.messageAppearance}>
+                            No
+                          </Typography>
+                        </Button>
+                      </Col>
+                    </Row>
                   </Col>
                 </Row>
               </>
@@ -554,10 +729,131 @@ const RightSection = () => {
         ]);
       }
       const result = await response.json();
-    } catch {
+      const text = result.text;
+      const urlMatch = text.match(/\((.*?)\)/);
+      const imageURL = urlMatch ? urlMatch[1] : null;
+
+      setAllMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          content: (
+            <>
+              <Row>
+                <Image
+                  width={200}
+                  src={imageURL}
+                  alt="Generated Character"
+                  preview={false} // Disable preview if you don't want a lightbox effect
+                  style={{
+                    borderRadius: "10px",
+                  }}
+                />
+              </Row>
+              <Row>
+                <Typography className={styles.messageAppearance}>
+                  Do you wish to proceed with Image generated?
+                </Typography>
+              </Row>
+              <Row>
+                <Col span={24}>
+                  <Row>
+                    <Col span={4} style={{ padding: 10 }}>
+                      <Button
+                        type="primary"
+                        onClick={() => selectImage(imageURL)}
+                      >
+                        <Typography className={styles.messageAppearance}>
+                          Yes
+                        </Typography>
+                      </Button>
+                    </Col>
+                    <Col span={4} style={{ padding: 10 }}>
+                      <Button type="primary">
+                        <Typography className={styles.messageAppearance}>
+                          No
+                        </Typography>
+                      </Button>
+                    </Col>
+                  </Row>
+                </Col>
+              </Row>
+            </>
+          ),
+          role: "Image Generator",
+        },
+      ]);
+    } catch (error) {
+      setErrorMessage("An error occurred. Please try again later.");
     } finally {
+      setIsSending(false);
+      setLoading(false);
     }
   };
+
+  // const generateImages = async () => {
+  //   try {
+  //     const input_proms = {
+  //       input_prompt: topic,
+  //     };
+
+  //     // const data = {
+  //     //   inputs: {
+  //     //     input_prompt: topic,
+  //     //   },
+  //     //   pipeline_name: "Copy of Image Generator Pipeline",
+  //     //   username: "krishna1264",
+  //     // };
+  //     debugger;
+  //     const data = new FormData();
+  //     data.append("pipeline_name", "Copy of Image Generator Pipeline");
+  //     data.append("username", "krishna1264");
+  //     data.append("inputs", JSON.stringify(input_proms));
+  //     const response = await fetch(
+  //       "https://api.vectorshift.ai/api/pipelines/run%22",
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Api-Key": "sk_I4xIB5vdJQ1xqVchUGQcDscFE23bu8gg9bwHP4r4Z05QAQJS",
+  //         },
+  //         body: data,
+  //       }
+  //     );
+  //     if (!response.ok) {
+  //       setAllMessages((prevMessages) => [
+  //         ...prevMessages,
+  //         {
+  //           content: (
+  //             <>
+  //               <Row>
+  //                 <Typography className={styles.messageAppearance}>
+  //                   There seem's to be issue with Image Generator AI Agent, Do
+  //                   you wish to proceed with above content for Review?
+  //                 </Typography>
+  //               </Row>
+  //               <Row>
+  //                 <Col span={4} style={{ padding: 10 }}>
+  //                   <Button
+  //                     type="primary"
+  //                     onClick={() => setNext("contentReviewer")}
+  //                   >
+  //                     Yes
+  //                   </Button>
+  //                 </Col>
+  //                 <Col span={4} style={{ padding: 10 }}>
+  //                   <Button type="primary">No</Button>
+  //                 </Col>
+  //               </Row>
+  //             </>
+  //           ),
+  //           role: "Supervisor",
+  //         },
+  //       ]);
+  //     }
+  //     const result = await response.json();
+  //   } catch {
+  //   } finally {
+  //   }
+  // };
 
   const marketingLeadApproval = async () => {
     try {
@@ -581,11 +877,25 @@ const RightSection = () => {
             content: (
               <>
                 <Row>
-                  <Typography className={styles.messageAppearance}>
-                    Readability Score is {result.readability}
+                  <Typography
+                    style={{
+                      color: "#3F5DFF",
+                      cursor: "pointer",
+                    }}
+                    className={styles.messageAppearance}
+                  >
+                    Readability Score : {result.readability}
                   </Typography>
-                  <Typography className={styles.messageAppearance}>
-                    Sentiment analysis Score is {result.sentiment}
+                </Row>
+                <Row style={{ marginBottom: "14px" }}>
+                  <Typography
+                    style={{
+                      color: "#3F5DFF",
+                      cursor: "pointer",
+                    }}
+                    className={styles.messageAppearance}
+                  >
+                    Sentiment analysis Score : {result.sentiment}
                   </Typography>
                 </Row>
                 <Row>
@@ -594,13 +904,23 @@ const RightSection = () => {
                   </Typography>
                 </Row>
                 <Row>
-                  <Col span={12}>
-                    <Button type="primary" onClick={() => postContent()}>
-                      Yes
-                    </Button>
-                  </Col>
-                  <Col span={12}>
-                    <Button type="primary">No</Button>
+                  <Col span={24}>
+                    <Row>
+                      <Col span={4} style={{ padding: 10 }}>
+                        <Button type="primary" onClick={() => postContent()}>
+                          <Typography className={styles.messageAppearance}>
+                            Yes
+                          </Typography>
+                        </Button>
+                      </Col>
+                      <Col span={4} style={{ padding: 10 }}>
+                        <Button type="primary">
+                          <Typography className={styles.messageAppearance}>
+                            No
+                          </Typography>
+                        </Button>
+                      </Col>
+                    </Row>
                   </Col>
                 </Row>
               </>
@@ -657,7 +977,7 @@ const RightSection = () => {
             setAllMessages((prevMessages) => [
               ...prevMessages,
               {
-                content: lastMessage,
+                content: item.messages[0],
                 role: item.agentName,
               },
             ]);
@@ -674,16 +994,26 @@ const RightSection = () => {
                   </Typography>
                 </Row>
                 <Row>
-                  <Col span={12}>
-                    <Button
-                      type="primary"
-                      onClick={() => setNext("contentGenerator")}
-                    >
-                      Yes
-                    </Button>
-                  </Col>
-                  <Col span={12}>
-                    <Button type="primary">No</Button>
+                  <Col span={24}>
+                    <Row>
+                      <Col span={4} style={{ padding: 10 }}>
+                        <Button
+                          type="primary"
+                          onClick={() => setNext("contentGenerator")}
+                        >
+                          <Typography className={styles.messageAppearance}>
+                            Yes
+                          </Typography>
+                        </Button>
+                      </Col>
+                      <Col span={4} style={{ padding: 10 }}>
+                        <Button type="primary">
+                          <Typography className={styles.messageAppearance}>
+                            No
+                          </Typography>
+                        </Button>
+                      </Col>
+                    </Row>
                   </Col>
                 </Row>
               </>
@@ -901,7 +1231,10 @@ const RightSection = () => {
                                 borderRadius: "15px", // Rounded corners for user messages
                                 whiteSpace: "normal", // Ensures the text wraps normally
                                 wordBreak: "break-word", // Prevents long words from overflowing
-                                display: "inline-block", // Ensures block-level display for normal text flow
+                                display:
+                                  msg.role === "user"
+                                    ? "inline-block"
+                                    : undefined, // Ensures block-level display for normal text flow
                                 backgroundColor:
                                   msg.role === "user"
                                     ? "#444C9B"
@@ -934,7 +1267,7 @@ const RightSection = () => {
                         fontSize: "36px",
                       }}
                     >
-                      Welcome to Content AI
+                      Welcome to Muse AI
                     </Typography.Title>
                   </Col>
                   <Col span={24}>
@@ -973,10 +1306,11 @@ const RightSection = () => {
                         lineHeight: "36px",
                       }}
                     >
-                      # Get the topic
+                      {/* # Get the topic */}
+                      Where Marketing Vision Meets Intelligent Solutions
                     </Typography.Title>
                   </Col>
-                  <Col span={24} style={{ marginTop: 10, cursor: "pointer" }}>
+                  {/* <Col span={24} style={{ marginTop: 10, cursor: "pointer" }}>
                     <Typography.Title
                       style={{
                         color: "#3F5DFF",
@@ -988,8 +1322,8 @@ const RightSection = () => {
                     >
                       # Content Creation
                     </Typography.Title>
-                  </Col>
-                  <Col span={24} style={{ marginTop: 10, cursor: "pointer" }}>
+                  </Col> */}
+                  {/* <Col span={24} style={{ marginTop: 10, cursor: "pointer" }}>
                     <Typography.Title
                       style={{
                         color: "#3F5DFF",
@@ -1001,7 +1335,7 @@ const RightSection = () => {
                     >
                       # Image Generation
                     </Typography.Title>
-                  </Col>
+                  </Col> */}
                 </Row>
               )}
             </Col>
@@ -1019,7 +1353,7 @@ const RightSection = () => {
             }}
           >
             <TextArea
-              placeholder="Create Content"
+              placeholder="Discover new Marketing Horizons"
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyPress}
               value={messageC}
@@ -1030,6 +1364,7 @@ const RightSection = () => {
                 flex: 1,
                 borderRadius: "87px",
                 border: "2px solid #9194A0",
+                padding: "0px 20px 0px 10px",
               }}
             />
             {!isSending ? (

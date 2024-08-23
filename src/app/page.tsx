@@ -19,10 +19,10 @@ export default function Home() {
       <Col span={2} className={styles.leftOut}>
         <SiderSection />
       </Col>
-      <Col span={4} className={styles.leftOut}>
+      {/* <Col span={4} className={styles.leftOut}>
         <LeftSection />
-      </Col>
-      <Col span={18} className={styles.rightOut}>
+      </Col> */}
+      <Col span={22} className={styles.rightOut}>
         <RightSection />
       </Col>
     </Row>
