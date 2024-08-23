@@ -42,6 +42,12 @@ const RightSection = () => {
   };
 
   useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+  }, [allMessages]); 
+
+  useEffect(() => {
     if (next === "promptEngineer") {
       promptEngineer();
     } else if (next === "contentGenerator") {
@@ -229,7 +235,7 @@ const RightSection = () => {
                 {/* ) */}
               </>
             ),
-            role: filterSupervisorMessages.agentName,
+            role: "Content Strategist",
           },
         ]);
         setMessage("");
@@ -1038,110 +1044,6 @@ const RightSection = () => {
   // };
 
   return (
-    // <div className={styles.rightSection}>
-    //   <div className={styles.rightin}>
-    //     <div className={styles.chatgptversion}>
-    //       <p className={styles.text1}>Chat</p>
-    //       <svg
-    //         xmlns="http://www.w3.org/2000/svg"
-    //         fill="none"
-    //         viewBox="0 0 24 24"
-    //         strokeWidth={1.5}
-    //         stroke="currentColor"
-    //         className="w-6 h-6"
-    //       >
-    //         <path
-    //           strokeLinecap="round"
-    //           strokeLinejoin="round"
-    //           d="m19.5 8.25-7.5 7.5-7.5-7.5"
-    //         />
-    //       </svg>
-    //     </div>
-
-    //     {allMessages.length > 0 ? (
-    //       <div className={styles.messages}>
-    //         {allMessages.map((msg, index) => {
-    //           return (
-    //             <div key={index} className={styles.message}>
-    //               <Image
-    //                 src={msg.role === "user" ? nouserlogo : Logo}
-    //                 width={50}
-    //                 height={50}
-    //                 alt=""
-    //               />
-    //               <div className={styles.details}>
-    //                 <h2>{msg.role === "user" ? "You" : msg.role}</h2>
-    //                 <p>{msg.content}</p>{" "}
-    //                 {/* Access the text property of the content object */}
-    //               </div>
-    //             </div>
-    //           );
-    //         })}
-    //       </div>
-    //     ) : (
-    //       <div className={styles.nochat}>
-    //         <div className={styles.s1}>
-    //           <h1>How can I help you today?</h1>
-    //         </div>
-    //         {/* <div className={styles.s2}>
-    //           <div className={styles.suggestioncard}>
-    //             <h2>Recommend activities</h2>
-    //             <p>Compare Insurance Policies</p>
-    //           </div>
-    //           <div className={styles.suggestioncard}>
-    //             <h2>Recommend activities</h2>
-    //             <p>psychology behind decision-making</p>
-    //           </div>
-    //           <div className={styles.suggestioncard}>
-    //             <h2>Recommend activities</h2>
-    //             <p>psychology behind decision-making</p>
-    //           </div>
-    //           <div className={styles.suggestioncard}>
-    //             <h2>Recommend activities</h2>
-    //             <p>psychology behind decision-making</p>
-    //           </div>
-    //         </div> */}
-    //       </div>
-    //     )}
-
-    //     <div className={styles.bottomsection}>
-    //       <div className={styles.messagebar}>
-    //         <TextArea
-    //           placeholder="Message Spotcheck Bot..."
-    //           onChange={(e) => setMessage(e.target.value)}
-    //           onKeyDown={handleKeyPress} // Call handleKeyPress when a key is pressed
-    //           value={messageC}
-    //           autoSize
-    //           style={{ backgroundColor: "transparent", color: "white" }}
-    //         />
-    //         {!isSending ? (
-    //           <svg
-    //             onClick={contentStrategist}
-    //             xmlns="http://www.w3.org/2000/svg"
-    //             fill="none"
-    //             viewBox="0 0 24 24"
-    //             strokeWidth={1.5}
-    //             stroke="currentColor"
-    //             className="w-6 h-6"
-    //           >
-    //             <path
-    //               strokeLinecap="round"
-    //               strokeLinejoin="round"
-    //               d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18"
-    //             />
-    //           </svg>
-    //         ) : (
-    //           <HashLoader color="#36d7b7" size={30} />
-    //         )}
-    //       </div>
-    //       <p>
-    //         Spotcheck Bot can make mistakes. Consider checking important
-    //         information.
-    //       </p>
-    //     </div>
-    //   </div>
-    // </div>
-
     <Layout
       style={{
         backgroundColor: "#202429",
@@ -1172,176 +1074,169 @@ const RightSection = () => {
         {/* </Row> */}
       </Header>
       <Content ref={messagesEndRef} style={{ overflow: "auto" }}>
-        <Spin spinning={loading} tip="Loading..." style={{ height: "100%" }}>
-          <Row
-            style={{
-              marginTop: 35,
-            }}
-          >
-            <Col span={24}>
-              {allMessages.length > 0 ? (
-                <List
-                  itemLayout="horizontal"
-                  dataSource={allMessages}
-                  style={{ padding: 20 }}
-                  renderItem={(msg, index) => (
-                    <List.Item
-                      key={index}
+        <Row
+          style={{
+            marginTop: 35,
+          }}
+        >
+          <Col span={24}>
+            {allMessages.length > 0 ? (
+              <List
+                itemLayout="horizontal"
+                dataSource={allMessages}
+                style={{ padding: 20 }}
+                renderItem={(msg, index) => (
+                  <List.Item
+                    key={index}
+                    style={{
+                      display: "flex",
+                      justifyContent:
+                        msg.role === "user" ? "flex-end" : "flex-start",
+                    }}
+                  >
+                    <div
                       style={{
-                        display: "flex",
-                        justifyContent:
-                          msg.role === "user" ? "flex-end" : "flex-start",
+                        width: "50%",
+                        padding:
+                          msg.role === "user" ? "0 0 0 10px" : "0 10px 0 0", // Padding to avoid overlap with the screen edge
+                        textAlign: msg.role === "user" ? "right" : "left",
                       }}
                     >
-                      <div
+                      <List.Item.Meta
+                        avatar={
+                          msg.role === "user" ? null : <AILogoComponent />
+                        }
+                        title={
+                          <strong>
+                            {msg.role === "user" ? null : (
+                              <Typography
+                                style={{
+                                  color: "#9194A0",
+                                  fontSize: "18px",
+                                  fontWeight: 400,
+                                  lineHeight: "27px",
+                                }}
+                              >
+                                {msg.role}
+                              </Typography>
+                            )}
+                          </strong>
+                        }
+                        description={
+                          <Typography
+                            style={{
+                              color: "#FFFFFF",
+                              fontWeight: 400,
+                              fontSize: "18px",
+                              lineHeight: "27px",
+                              borderRadius: "15px", // Rounded corners for user messages
+                              whiteSpace: "normal", // Ensures the text wraps normally
+                              wordBreak: "break-word", // Prevents long words from overflowing
+                              display:
+                                msg.role === "user"
+                                  ? "inline-block"
+                                  : undefined, // Ensures block-level display for normal text flow
+                              backgroundColor:
+                                msg.role === "user" ? "#444C9B" : "transparent", // Blue background for user messages
+                              padding:
+                                msg.role === "user"
+                                  ? "10px 20px 10px 20px"
+                                  : "0px", // Padding inside the message bubble
+                            }}
+                          >
+                            {msg.content}
+                          </Typography>
+                        }
+                      />
+                    </div>
+                  </List.Item>
+                )}
+              />
+            ) : (
+              <Row style={{ textAlign: "center", marginTop: 50 }}>
+                <Col span={24}>
+                  <LogoComponent height={100} />
+                </Col>
+                <Col span={24}>
+                  <Typography.Title
+                    style={{
+                      color: "#FFFFFF",
+                      textAlign: "center",
+                      fontSize: "36px",
+                    }}
+                  >
+                    Welcome to Muse AI
+                  </Typography.Title>
+                </Col>
+                <Col span={24}>
+                  <Row>
+                    <Col span={7}></Col>
+                    <Col
+                      span={10}
+                      style={{
+                        alignContent: "center",
+                        textAlign: "center",
+                      }}
+                    >
+                      <Typography
                         style={{
-                          width: "50%",
-                          padding:
-                            msg.role === "user" ? "0 0 0 10px" : "0 10px 0 0", // Padding to avoid overlap with the screen edge
-                          textAlign: msg.role === "user" ? "right" : "left",
+                          color: "#FFFFFF",
+                          fontSize: "14px",
+                          lineHeight: "21px",
                         }}
                       >
-                        <List.Item.Meta
-                          avatar={
-                            msg.role === "user" ? null : <AILogoComponent />
-                          }
-                          title={
-                            <strong>
-                              {msg.role === "user" ? null : (
-                                <Typography
-                                  style={{
-                                    color: "#9194A0",
-                                    fontSize: "18px",
-                                    fontWeight: 400,
-                                    lineHeight: "27px",
-                                  }}
-                                >
-                                  {msg.role}
-                                </Typography>
-                              )}
-                            </strong>
-                          }
-                          description={
-                            <Typography
-                              style={{
-                                color: "#FFFFFF",
-                                fontWeight: 400,
-                                fontSize: "18px",
-                                lineHeight: "27px",
-                                borderRadius: "15px", // Rounded corners for user messages
-                                whiteSpace: "normal", // Ensures the text wraps normally
-                                wordBreak: "break-word", // Prevents long words from overflowing
-                                display:
-                                  msg.role === "user"
-                                    ? "inline-block"
-                                    : undefined, // Ensures block-level display for normal text flow
-                                backgroundColor:
-                                  msg.role === "user"
-                                    ? "#444C9B"
-                                    : "transparent", // Blue background for user messages
-                                padding:
-                                  msg.role === "user"
-                                    ? "10px 20px 10px 20px"
-                                    : "0px", // Padding inside the message bubble
-                              }}
-                            >
-                              {msg.content}
-                            </Typography>
-                          }
-                        />
-                      </div>
-                    </List.Item>
-                  )}
-                />
-              ) : (
-                <Row style={{ textAlign: "center", marginTop: 50 }}>
-                  <Col span={24}>
-                    <LogoComponent height={100} />
-                  </Col>
-                  {/* Adjust width and height as needed */}
-                  <Col span={24}>
-                    <Typography.Title
-                      style={{
-                        color: "#FFFFFF",
-                        textAlign: "center",
-                        fontSize: "36px",
-                      }}
-                    >
-                      Welcome to Muse AI
-                    </Typography.Title>
-                  </Col>
-                  <Col span={24}>
-                    <Row>
-                      <Col span={7}></Col>
-                      <Col
-                        span={10}
-                        style={{
-                          alignContent: "center",
-                          textAlign: "center",
-                        }}
-                      >
-                        <Typography
-                          style={{
-                            color: "#FFFFFF",
-                            fontSize: "14px",
-                            lineHeight: "21px",
-                          }}
-                        >
-                          Unlock your creative potential with our powerful
-                          content creation tool—designed to streamline your
-                          workflow, enhance your storytelling, and bring your
-                          ideas to life across any platform.
-                        </Typography>
-                      </Col>
-                      <Col span={7}></Col>
-                    </Row>
-                  </Col>
-                  <Col span={24} style={{ marginTop: 20, cursor: "pointer" }}>
-                    <Typography.Title
-                      style={{
-                        color: "#3F5DFF",
-                        textAlign: "center",
-                        fontSize: "24px",
-                        fontWeight: 400,
-                        lineHeight: "36px",
-                      }}
-                    >
-                      {/* # Get the topic */}
-                      Where Marketing Vision Meets Intelligent Solutions
-                    </Typography.Title>
-                  </Col>
-                  {/* <Col span={24} style={{ marginTop: 10, cursor: "pointer" }}>
-                    <Typography.Title
-                      style={{
-                        color: "#3F5DFF",
-                        textAlign: "center",
-                        fontSize: "24px",
-                        fontWeight: 400,
-                        lineHeight: "36px",
-                      }}
-                    >
-                      # Content Creation
-                    </Typography.Title>
-                  </Col> */}
-                  {/* <Col span={24} style={{ marginTop: 10, cursor: "pointer" }}>
-                    <Typography.Title
-                      style={{
-                        color: "#3F5DFF",
-                        textAlign: "center",
-                        fontSize: "24px",
-                        fontWeight: 400,
-                        lineHeight: "36px",
-                      }}
-                    >
-                      # Image Generation
-                    </Typography.Title>
-                  </Col> */}
-                </Row>
-              )}
-            </Col>
-          </Row>
-        </Spin>
+                        Unlock your creative potential with our powerful content
+                        creation tool—designed to streamline your workflow,
+                        enhance your storytelling, and bring your ideas to life
+                        across any platform.
+                      </Typography>
+                    </Col>
+                    <Col span={7}></Col>
+                  </Row>
+                </Col>
+                <Col span={24} style={{ marginTop: 20, cursor: "pointer" }}>
+                  <Typography.Title
+                    style={{
+                      color: "#3F5DFF",
+                      textAlign: "center",
+                      fontSize: "24px",
+                      fontWeight: 400,
+                      lineHeight: "36px",
+                    }}
+                  >
+                    Where Marketing Vision Meets Intelligent Solutions
+                  </Typography.Title>
+                </Col>
+              </Row>
+            )}
+            {/* Display "typing..." when loading is true */}
+            {loading && (
+              <Row
+                style={{
+                  marginTop: 10,
+                  display: "flex",
+                  justifyContent: "flex-start",
+                  alignItems: "center",
+                }}
+              >
+                <Col span={24}>
+                  <Typography.Text
+                    style={{
+                      color: "#9194A0",
+                      fontSize: "16px",
+                      fontStyle: "italic",
+                      padding: "20px",
+                    }}
+                  >
+                    Typing...
+                  </Typography.Text>
+                </Col>
+              </Row>
+            )}
+          </Col>
+        </Row>
       </Content>
+
       <Footer style={{ backgroundColor: "#202429", borderRadius: "14px" }}>
         <>
           <Col
