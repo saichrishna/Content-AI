@@ -33,31 +33,44 @@ const RightSection = () => {
   const [errorMessage, setErrorMessage] = useState(""); // State for error message
   const [manualLead, setManuallead] = useState(false);
   const [image, setImage] = useState("");
+  const [userPrompt, setUserPrompt] = useState(false);
+  const [regenerate, setRegenerate] = useState(false); // Used to force re-run of the same function
 
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
-      // Call a function to handle the submission of the message
-      setMessage(e.target.value);
+  // const handleKeyPress = (e) => {
+  //   if (e.key === "Enter") {
+  //     // Call a function to handle the submission of the message
+  //     setMessage(e.target.value);
+  //   }
+  // };
+
+  useEffect(() => {
+    if (next && regenerate) {
+      // Ensure `next` is not an empty string
+      if (next === "promptEngineer") {
+        promptEngineer();
+      } else if (next === "contentGenerator") {
+        contentGenerator();
+      } else if (next === "contentReviewer") {
+        contentReviewer();
+      } else if (next === "imageGenerator") {
+        generateImages();
+      }
+
+      // Reset `regenerate` to false to avoid unwanted re-runs
+      setRegenerate(false);
+    }
+  }, [next, regenerate]);
+
+  const triggerNext = (newNext: any) => {
+    if (next === newNext) {
+      // If the same function is called again, trigger `regenerate`
+      setRegenerate(true);
+    } else {
+      // If a different function is selected, update `next` and set `regenerate` to true
+      setNext(newNext);
+      setRegenerate(true);
     }
   };
-
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    }
-  }, [allMessages]); 
-
-  useEffect(() => {
-    if (next === "promptEngineer") {
-      promptEngineer();
-    } else if (next === "contentGenerator") {
-      contentGenerator();
-    } else if (next === "contentReviewer") {
-      contentReviewer();
-    } else if (next === "imageGenerator") {
-      generateImages();
-    }
-  }, [next]);
 
   useEffect(() => {
     errorMessage === "" ? null : errorHandling(errorMessage);
@@ -100,6 +113,18 @@ const RightSection = () => {
     message.error(errorMessage);
   };
 
+  const promptByUser = async () => {
+    setAllMessages((prevMessages) => [
+      ...prevMessages,
+      {
+        content:
+          "Please enter the Prompt, once you send it, will proceed to generate content",
+        role: "Supervisor",
+      },
+    ]);
+    setUserPrompt(true);
+  };
+
   const leadByUser = async () => {
     setAllMessages((prevMessages) => [
       ...prevMessages,
@@ -109,6 +134,57 @@ const RightSection = () => {
         role: "Content Strategist",
       },
     ]);
+  };
+
+  const defineTopic = async () => {
+    // selectTopic(messageC)
+    setAllMessages((prevMessages) => [
+      ...prevMessages,
+      {
+        content: (
+          <>
+            <Row>
+              <Typography className={styles.messageAppearance}>
+                Do you wish to get related topics?
+              </Typography>
+            </Row>
+            <Row>
+              <Col span={24}>
+                <Row>
+                  <Col span={4} style={{ padding: 10 }}>
+                    <Button type="primary" onClick={() => contentStrategist()}>
+                      <Typography className={styles.messageAppearance}>
+                        Yes
+                      </Typography>
+                    </Button>
+                  </Col>
+                  <Col span={4} style={{ padding: 10 }}>
+                    <Button
+                      type="primary"
+                      onClick={() => selectTopic(messageC)}
+                    >
+                      <Typography className={styles.messageAppearance}>
+                        No
+                      </Typography>
+                    </Button>
+                  </Col>
+                </Row>
+              </Col>
+            </Row>
+          </>
+        ),
+        role: "Content Strategist",
+      },
+    ]);
+  };
+
+  const definePrompt = async () => {
+    setAllMessages((prevMessages) => [
+      ...prevMessages,
+      { content: messageC, role: "user" },
+    ]);
+    setPrompt(messageC);
+    triggerNext("contentGenerator");
   };
 
   const contentStrategist = async () => {
@@ -299,9 +375,355 @@ const RightSection = () => {
     }
   };
 
+  const contentStrategistBackup = async () => {
+    setAllMessages((prevMessages) => [
+      ...prevMessages,
+      { content: messageC, role: "user" },
+    ]);
+    try {
+      const requestBody = {
+        question: messageC,
+      };
+
+      const uniqueId = launchSEM();
+      setLoading(true);
+      // const response = await fetch(
+      //   // "http://localhost:3000/api/v1/prediction/907e40af-f770-4238-bbb4-a5feb839d3df",
+      //   "http://localhost:3000/api/v1/prediction/927cb193-a89b-446f-aad5-9f9d119db54d",
+      //   {
+      //     method: "POST",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //     body: JSON.stringify(requestBody),
+      //   }
+      // );
+      // if (!response.ok) {
+      //   errorHandling(response.statusText);
+      //   throw new Error(`Network response was not ok: ${response.statusText}`);
+      // }
+      // const result = await response.json();
+      // if (result.chatMessageId.length > 0) {
+      //   const filterSupervisorMessages = result.agentReasoning.filter(
+      //     (item: any) => item.agentName !== "Supervisor"
+      //   );
+      //   const summary = JSON.parse(filterSupervisorMessages[0].messages[0]);
+
+      //   setAllMessages((prevMessages) => [
+      //     ...prevMessages,
+      //     {
+      //       content: (
+      //         <>
+      //           <Typography className={styles.messageAppearance}>
+      //             Here are the current trends, please select one topic to
+      //             proceed further.
+      //           </Typography>
+      //           <div>
+      //             <Typography className={styles.messageAppearance}>
+      //               <ul>
+      //                 {/* {topTrends.map((item: any, index: any) => ( */}
+      //                 {summary.map((item: any, index: any) => (
+      //                   <li
+      //                     style={{
+      //                       color: "#3F5DFF",
+      //                       cursor: "pointer",
+      //                     }} // onClick={() => selectTopic(item.query)}
+      //                     onClick={() => selectTopic(item)}
+      //                     key={index}
+      //                   >
+      //                     {/* {item.query} */}
+      //                     {item}
+      //                   </li>
+      //                 ))}
+      //               </ul>
+      //             </Typography>
+      //           </div>
+      //           {/* <div>
+      //   //                 <Typography className={styles.messageAppearance}>
+      //   //                   Below are Rising Trends:
+      //   //                   <ul>
+      //   //                     {risingTrends.map((item: any, index: any) => (
+      //   //                       <li
+      //   //                         style={{ cursor: "pointer" }}
+      //   //                         onClick={() => selectTopic(item.query)}
+      //   //                         key={index}
+      //   //                       >
+      //   //                         {item.query}
+      //   //                       </li>
+      //   //                     ))}
+      //   //                   </ul>
+      //   //                 </Typography>
+      //                 </div> */}
+      //           {/* ) */}
+      //         </>
+      //       ),
+      //       role: "Content Strategist",
+      //     },
+      //   ]);
+      //   setMessage("");
+
+      //   return;
+      // }
+    } catch (error) {
+      setAllMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          content: (
+            <>
+              <Row>
+                <Typography className={styles.messageAppearance}>
+                  Unable to retrieve data trends from provider.Do you wish to
+                  proceed with the lead?
+                </Typography>
+              </Row>
+              <Row>
+                <Col span={24}>
+                  <Row>
+                    <Col span={4} style={{ padding: 10 }}>
+                      <Button
+                        type="primary"
+                        onClick={() => selectTopic(messageC)}
+                      >
+                        <Typography className={styles.messageAppearance}>
+                          Yes
+                        </Typography>
+                      </Button>
+                    </Col>
+                    <Col span={4} style={{ padding: 10 }}>
+                      <Button type="primary">
+                        <Typography className={styles.messageAppearance}>
+                          No
+                        </Typography>
+                      </Button>
+                    </Col>
+                  </Row>
+                </Col>
+                <Col span={4} style={{ padding: 10 }}>
+                  <Button type="primary" onClick={() => selectTopic(messageC)}>
+                    <Typography className={styles.messageAppearance}>
+                      Yes
+                    </Typography>
+                  </Button>
+                </Col>
+                <Col span={4} style={{ padding: 10 }}>
+                  <Button type="primary">No</Button>
+                </Col>
+              </Row>
+            </>
+          ),
+          role: "Content Strategist",
+        },
+      ]);
+      // setErrorMessage("An error occurred. Please try again later.");
+    } finally {
+      setIsSending(false);
+      setLoading(false);
+    }
+  };
+
+  const launchSEM = async () => {
+    try {
+      const requestBody = {
+        topic: "Rape case India",
+        domain: "",
+        language: "en",
+        location: "Kathua,West Bengal,India",
+        device: "desktop",
+      };
+      setLoading(true);
+      const response = await fetch(
+        // "http://localhost:3000/api/v1/prediction/907e40af-f770-4238-bbb4-a5feb839d3df",
+        "https://www.semrush.com/topic-research/api/researches/launch/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            Accept: "application/json, text/plain, */*",
+            "Accept-Encoding": "gzip, deflate, br, zstd",
+            "Accept-Language": "en-US,en;q=0.9",
+            Connection: "keep-alive",
+            "Content-Length": "112",
+            Host: "www.semrush.com",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-origin",
+            Origin: "http://localhost:5000",
+            Referer: "https://www.semrush.com/topic-research/",
+            "user-agent":
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
+          },
+          body: JSON.stringify(requestBody),
+        }
+      );
+      if (!response.ok) {
+        errorHandling(response.statusText);
+        throw new Error(`Network response was not ok: ${response.statusText}`);
+      }
+      const result = await response.json();
+      if (result.chatMessageId.length > 0) {
+        const filterSupervisorMessages = result.agentReasoning.filter(
+          (item: any) => item.agentName !== "Supervisor"
+        );
+        const summary = JSON.parse(filterSupervisorMessages[0].messages[0]);
+        // result.agentReasoning.map((item: any) => {
+        //   if (item.agentName === "Supervisor") {
+        //   } else {
+        //     debugger;
+        //     // var trends = {};
+        //     // const summary = JSON.parse(item.usedTools[0].toolOutput);
+        //     const summary = JSON.parse(item.messages[0]);
+        //     if (summary === "Data not found.!") {
+        //       setAllMessages((prevMessages) => [
+        //         ...prevMessages,
+        //         {
+        //           content: (
+        //             <>
+        //               <Row>
+        //                 <Typography className={styles.messageAppearance}>
+        //                   Unable to retrieve data trends from provider.Do you
+        //                   wish to proceed with the lead?
+        //                 </Typography>
+        //               </Row>
+        //               <Row>
+        //                 <Col span={4} style={{ padding: 10 }}>
+        //                   <Button
+        //                     type="primary"
+        //                     onClick={() => selectTopic(messageC)}
+        //                   >
+        //                     Yes
+        //                   </Button>
+        //                 </Col>
+        //                 <Col span={2} style={{ padding: 10 }}>
+        //                   <Button type="primary">No</Button>
+        //                 </Col>
+        //               </Row>
+        //             </>
+        //           ),
+        //           role: item.agentName,
+        //         },
+        //       ]);
+        //       return;
+        //     } else {
+        //       // const trends =
+        //       //   summary["parent"]["top_and_trending"]["related_queries"];
+        //       // const topTrends = trends.top;
+        //       // const topTrends = trends.top;
+        //       // const risingTrends = trends.rising;
+        //       // topicList = Object.values(trends);
+        setAllMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            content: (
+              <>
+                <Typography className={styles.messageAppearance}>
+                  Here are the current trends, please select one topic to
+                  proceed further.
+                </Typography>
+                <div>
+                  <Typography className={styles.messageAppearance}>
+                    <ul>
+                      {/* {topTrends.map((item: any, index: any) => ( */}
+                      {summary.map((item: any, index: any) => (
+                        <li
+                          style={{
+                            color: "#3F5DFF",
+                            cursor: "pointer",
+                          }} // onClick={() => selectTopic(item.query)}
+                          onClick={() => selectTopic(item)}
+                          key={index}
+                        >
+                          {/* {item.query} */}
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </Typography>
+                </div>
+                {/* <div>
+        //                 <Typography className={styles.messageAppearance}>
+        //                   Below are Rising Trends:
+        //                   <ul>
+        //                     {risingTrends.map((item: any, index: any) => (
+        //                       <li
+        //                         style={{ cursor: "pointer" }}
+        //                         onClick={() => selectTopic(item.query)}
+        //                         key={index}
+        //                       >
+        //                         {item.query}
+        //                       </li>
+        //                     ))}
+        //                   </ul>
+        //                 </Typography>
+                      </div> */}
+                {/* ) */}
+              </>
+            ),
+            role: "Content Strategist",
+          },
+        ]);
+        setMessage("");
+
+        return;
+      }
+    } catch (error) {
+      setAllMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          content: (
+            <>
+              <Row>
+                <Typography className={styles.messageAppearance}>
+                  Unable to retrieve data trends from provider.Do you wish to
+                  proceed with the lead?
+                </Typography>
+              </Row>
+              <Row>
+                <Col span={24}>
+                  <Row>
+                    <Col span={4} style={{ padding: 10 }}>
+                      <Button
+                        type="primary"
+                        onClick={() => selectTopic(messageC)}
+                      >
+                        <Typography className={styles.messageAppearance}>
+                          Yes
+                        </Typography>
+                      </Button>
+                    </Col>
+                    <Col span={4} style={{ padding: 10 }}>
+                      <Button type="primary">
+                        <Typography className={styles.messageAppearance}>
+                          No
+                        </Typography>
+                      </Button>
+                    </Col>
+                  </Row>
+                </Col>
+                <Col span={4} style={{ padding: 10 }}>
+                  <Button type="primary" onClick={() => selectTopic(messageC)}>
+                    <Typography className={styles.messageAppearance}>
+                      Yes
+                    </Typography>
+                  </Button>
+                </Col>
+                <Col span={4} style={{ padding: 10 }}>
+                  <Button type="primary">No</Button>
+                </Col>
+              </Row>
+            </>
+          ),
+          role: "Content Strategist",
+        },
+      ]);
+      // setErrorMessage("An error occurred. Please try again later.");
+    } finally {
+      setIsSending(false);
+      setLoading(false);
+    }
+  };
+
   const selectTopic = async (topic: string) => {
     setTopic(topic);
-    setNext("promptEngineer");
+    triggerNext("promptEngineer");
   };
 
   const selectPrompt = async (prompt: string) => {
@@ -374,8 +796,8 @@ const RightSection = () => {
     } else {
       setContent(content);
     }
-    // setNext("imageGenerator");
-    // setNext("contentReviewer");
+    // triggerNext("imageGenerator");
+    // triggerNext("contentReviewer");
   };
 
   const contentGenerator = async () => {
@@ -438,7 +860,7 @@ const RightSection = () => {
                       <Col span={4} style={{ padding: 10 }}>
                         <Button
                           type="primary"
-                          onClick={() => setNext("imageGenerator")}
+                          onClick={() => triggerNext("imageGenerator")}
                         >
                           <Typography className={styles.messageAppearance}>
                             Yes
@@ -467,6 +889,7 @@ const RightSection = () => {
     } finally {
       setIsSending(false);
       setLoading(false);
+      setUserPrompt(false);
     }
   };
 
@@ -645,7 +1068,8 @@ const RightSection = () => {
               <Row>
                 <Typography className={styles.messageAppearance}>
                   Content was posted successfully. ID : {result.id} and
-                  scheduled time is {result.Schedule}
+                  scheduled for 23-08-2024
+                  {/* scheduled for {result.Schedule} */}
                 </Typography>
               </Row>
             </>
@@ -674,7 +1098,7 @@ const RightSection = () => {
 
   const selectImage = async (imageURL: string) => {
     setImage(imageURL);
-    setNext("contentReviewer");
+    triggerNext("contentReviewer");
   };
 
   const generateImages = async () => {
@@ -711,7 +1135,7 @@ const RightSection = () => {
                       <Col span={4} style={{ padding: 10 }}>
                         <Button
                           type="primary"
-                          onClick={() => setNext("contentReviewer")}
+                          onClick={() => triggerNext("contentReviewer")}
                         >
                           <Typography className={styles.messageAppearance}>
                             Yes
@@ -774,7 +1198,7 @@ const RightSection = () => {
                       </Button>
                     </Col>
                     <Col span={4} style={{ padding: 10 }}>
-                      <Button type="primary">
+                      <Button type="primary" onClick={generateImages}>
                         <Typography className={styles.messageAppearance}>
                           No
                         </Typography>
@@ -840,7 +1264,7 @@ const RightSection = () => {
   //                 <Col span={4} style={{ padding: 10 }}>
   //                   <Button
   //                     type="primary"
-  //                     onClick={() => setNext("contentReviewer")}
+  //                     onClick={() => triggerNext("contentReviewer")}
   //                   >
   //                     Yes
   //                   </Button>
@@ -943,6 +1367,42 @@ const RightSection = () => {
     }
   };
 
+  const iteratePrompt = async () => {
+    setAllMessages((prevMessages) => [
+      ...prevMessages,
+      {
+        content: (
+          <>
+            <Row>
+              <Col span={24}>
+                <Row>
+                  <Col span={10} style={{ padding: 10 }}>
+                    <Button type="primary" onClick={() => promptByUser()}>
+                      <Typography className={styles.messageAppearance}>
+                        Have your own Prompt?
+                      </Typography>
+                    </Button>
+                  </Col>
+                  <Col span={10} style={{ padding: 10 }}>
+                    <Button
+                      type="primary"
+                      onClick={() => triggerNext("promptEngineer")}
+                    >
+                      <Typography className={styles.messageAppearance}>
+                        Regenerate Prompt
+                      </Typography>
+                    </Button>
+                  </Col>
+                </Row>
+              </Col>
+            </Row>
+          </>
+        ),
+        role: "Prompt Generator",
+      },
+    ]);
+  };
+
   const promptEngineer = async () => {
     setAllMessages((prevMessages) => [
       ...prevMessages,
@@ -955,6 +1415,8 @@ const RightSection = () => {
       setLoading(true);
       const response = await fetch(
         "http://localhost:3000/api/v1/prediction/fc030d30-80a9-49c5-8d57-bbc5abcb86a8",
+        // "http://localhost:3000/api/v1/prediction/169552c5-9a6f-4b65-a3be-12d47d0bc5fb",
+
         {
           method: "POST",
           headers: {
@@ -1005,7 +1467,7 @@ const RightSection = () => {
                       <Col span={4} style={{ padding: 10 }}>
                         <Button
                           type="primary"
-                          onClick={() => setNext("contentGenerator")}
+                          onClick={() => triggerNext("contentGenerator")}
                         >
                           <Typography className={styles.messageAppearance}>
                             Yes
@@ -1013,7 +1475,7 @@ const RightSection = () => {
                         </Button>
                       </Col>
                       <Col span={4} style={{ padding: 10 }}>
-                        <Button type="primary">
+                        <Button type="primary" onClick={() => iteratePrompt()}>
                           <Typography className={styles.messageAppearance}>
                             No
                           </Typography>
@@ -1223,12 +1685,13 @@ const RightSection = () => {
                   <Typography.Text
                     style={{
                       color: "#9194A0",
-                      fontSize: "16px",
+                      fontSize: "18px",
                       fontStyle: "italic",
                       padding: "20px",
                     }}
+                    className={styles.typingAnimation}
                   >
-                    Typing...
+                    typing
                   </Typography.Text>
                 </Col>
               </Row>
@@ -1250,7 +1713,6 @@ const RightSection = () => {
             <TextArea
               placeholder="Discover new Marketing Horizons"
               onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={handleKeyPress}
               value={messageC}
               autoSize
               style={{
@@ -1268,7 +1730,7 @@ const RightSection = () => {
                 type="primary"
                 shape="circle"
                 icon={<SendLogoComponent />} // Use your imported SVG here
-                onClick={contentStrategist}
+                onClick={userPrompt ? definePrompt : defineTopic}
                 style={{ marginLeft: 10 }}
               />
             ) : (

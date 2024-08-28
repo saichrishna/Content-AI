@@ -173,6 +173,38 @@
   max-width: 1000px;
 }
 
+.typingAnimation {
+  display: inline-block;
+  position: relative;
+  font-size: 16px;
+  font-style: italic;
+  color: #9194A0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.typingAnimation::after {
+  content: '.....';
+  position: absolute;
+  right: 0;
+  animation: typing 1.5s steps(3, end) infinite;
+}
+
+@keyframes typing {
+  0% { 
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  50% { 
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% { 
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
 .messageAppearance {
   color: #FFFFFF;
   font-weight: 400;
