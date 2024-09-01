@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import styles from "@/styles/RightSection.module.css";
 import nouserlogo from "@/assets/nouserlogo.png";
 import { HashLoader } from "react-spinners";
-import { Button, Col, Input, message, Row } from "antd";
+import { Button, Col, Input, message, Row, Select } from "antd";
 const { TextArea } = Input;
 import { Layout, Typography, List, Avatar, Spin, Image } from "antd";
 import { ArrowDownOutlined, SendOutlined } from "@ant-design/icons";
@@ -13,6 +13,12 @@ import SendLogoComponent from "../assets/sendLogo.svg"; // Adjust the path as ne
 import LogoComponent from "../assets/Logo.svg"; // Adjust the path as necessary
 import AgentImageComponent from "../assets/Agent.svg"; // Adjust the path as necessary
 import AILogoComponent from "../assets/AgentMessageIcon.svg"; // Adjust the path as necessary
+import { DatePicker, Space } from "antd";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
+dayjs.extend(customParseFormat);
+const { Option } = Select;
 
 const RightSection = () => {
   const [loading, setLoading] = useState(false);
@@ -35,6 +41,8 @@ const RightSection = () => {
   const [image, setImage] = useState("");
   const [userPrompt, setUserPrompt] = useState(false);
   const [regenerate, setRegenerate] = useState(false); // Used to force re-run of the same function
+  const [selectedDate, setSelectedDate] = useState<dayjs.Dayjs | null>(null);
+  const [selectedPlatform, setSelectedPlatform] = useState("");
 
   // const handleKeyPress = (e) => {
   //   if (e.key === "Enter") {
@@ -108,6 +116,15 @@ const RightSection = () => {
     }
   }, [latestMessage, latestMessageIndex]);
   let concatenatedString = "";
+
+  const handleDateChange = (value: dayjs.Dayjs | null) => {
+    setSelectedDate(value);
+  };
+
+  const handlePlatformChange = (value: any) => {
+    debugger;
+    setSelectedPlatform(value);
+  };
 
   const errorHandling = (errorMessage: any) => {
     message.error(errorMessage);
@@ -914,8 +931,8 @@ const RightSection = () => {
         }
       );
       if (!response.ok) {
-        // errorHandling(response.statusText);
-        // throw new Error(`Network response was not ok: ${response.statusText}`);
+        errorHandling(response.statusText);
+        throw new Error(`Network response was not ok: ${response.statusText}`);
         setAllMessages((prevMessages) => [
           ...prevMessages,
           {
@@ -1036,12 +1053,14 @@ const RightSection = () => {
   };
 
   const postContent = async () => {
+    debugger;
     const reqBody = {
       Post_Type: 1920079,
       Post_Content: content,
-      Schedule: "2024-01-01T12:00:00Z",
+      Schedule: selectedDate,
       Image_URL: image,
       Status: 1920104,
+      Social_Media: selectedPlatform,
     };
     const response = await fetch(
       "https://api.baserow.io/api/database/rows/table/341222/?user_field_names=true",
@@ -1330,26 +1349,56 @@ const RightSection = () => {
                 </Row>
                 <Row>
                   <Typography className={styles.messageAppearance}>
-                    Do you wish to proceed?
+                    Schedule time and platform for the post
                   </Typography>
+                </Row>
+
+                <Row>
+                  <Col span={24} style={{ marginTop: 20 }}>
+                    <DatePicker
+                      className="custom-blue-bg"
+                      format="YYYY-MM-DD HH:mm:ss"
+                      showTime={{
+                        defaultValue: dayjs("00:00:00", "HH:mm:ss"),
+                      }}
+                      onChange={handleDateChange}
+                      style={{ width: 300 }}
+                    />
+                  </Col>
+                </Row>
+                <Row>
+                  <Col span={24} style={{ marginTop: 20 }}>
+                    <Select
+                      style={{ width: 300 }}
+                      value={selectedPlatform} // Set the value here
+                      placeholder="Select Social Media Platform"
+                      onChange={handlePlatformChange}
+                    >
+                      <Option value="1952281">Facebook</Option>
+                      {/* <Option value="witter">Twitter</Option> */}
+                      <Option value="1952281">LinkedIn</Option>
+                      {/* <Option value="Instagram">Instagram</Option>
+                      <Option value="TikTok">TikTok</Option> */}
+                    </Select>
+                  </Col>
                 </Row>
                 <Row>
                   <Col span={24}>
                     <Row>
-                      <Col span={4} style={{ padding: 10 }}>
+                      <Col span={4} style={{ marginTop: 20 }}>
                         <Button type="primary" onClick={() => postContent()}>
                           <Typography className={styles.messageAppearance}>
-                            Yes
+                            Continue
                           </Typography>
                         </Button>
                       </Col>
-                      <Col span={4} style={{ padding: 10 }}>
+                      {/* <Col span={4} style={{ padding: 10 }}>
                         <Button type="primary">
                           <Typography className={styles.messageAppearance}>
                             No
                           </Typography>
                         </Button>
-                      </Col>
+                      </Col> */}
                     </Row>
                   </Col>
                 </Row>
@@ -1730,7 +1779,8 @@ const RightSection = () => {
                 type="primary"
                 shape="circle"
                 icon={<SendLogoComponent />} // Use your imported SVG here
-                onClick={userPrompt ? definePrompt : defineTopic}
+                // onClick={userPrompt ? definePrompt : defineTopic}
+                onClick={marketingLeadApproval}
                 style={{ marginLeft: 10 }}
               />
             ) : (

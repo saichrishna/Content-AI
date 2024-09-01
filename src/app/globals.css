@@ -39,7 +39,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.1); /* Transparent thumb, adjust the opacity as needed */
+  background: rgba(
+    0,
+    0,
+    0,
+    0.1
+  ); /* Transparent thumb, adjust the opacity as needed */
   border-radius: 4px; /* Round the scrollbar thumb */
 }
 
@@ -62,3 +67,80 @@ body {
   display: none; /* Hide scrollbar for Internet Explorer and Edge */
 }
 
+.ant-picker {
+  background-color: #3f5dff !important; /* Blue background */
+}
+
+.ant-picker-input input::placeholder {
+  color: #ffffff !important; /* Red placeholder text */
+  font-family: "Poppins", sans-serif;
+  font-size: 16px;
+}
+
+.ant-picker-input input {
+  color: #ffffff !important; /* Red placeholder text */
+  font-family: "Poppins", sans-serif !important;
+  font-size: 16px;
+}
+.ant-picker-input .ant-input-prefix {
+  color: #ffffff !important; /* Green prefix */
+}
+
+/* Set the color of the suffix (calendar icon) */
+.ant-picker-suffix {
+  color: #ffffff !important; /* Magenta suffix (calendar icon) */
+}
+
+.ant-select-selector {
+  background-color: #3f5dff !important; /* Blue background */
+  color: #ffffff !important; /* Text color */
+}
+
+.ant-select-selector .ant-select-selection-placeholder {
+  color: #ffffff !important; /* White placeholder text */
+  font-family: "Poppins", sans-serif !important; /* Font family */
+  font-size: 16px !important; /* Font size */
+}
+/* Set the color and style of the placeholder text */
+.ant-select-selector .ant-select-selection-item {
+  color: #ffffff !important; /* White placeholder text */
+  font-family: "Poppins", sans-serif !important; /* Font family */
+  font-size: 20px !important; /* Font size */
+}
+
+.ant-select-item-option-content {
+  color: #ffffff !important; /* White placeholder text */
+  font-family: "Poppins", sans-serif !important; /* Font family */
+  font-size: 16px !important; /* Font size */
+}
+
+/* Set the color of the tags (selected items) */
+.ant-select-selection-item {
+  background-color: #4a6aff !important; /* Slightly different blue for tags */
+  color: #ffffff !important; /* White text for tags */
+}
+
+/* Set the color of the remove icon (for tags) */
+.ant-select-selection-item-remove {
+  color: #ffffff !important; /* White remove icon */
+}
+
+/* Set the color of the arrow icon (suffix) */
+.ant-select-arrow {
+  color: #ffffff !important; /* White arrow icon */
+}
+
+/* Set the background color of the dropdown menu */
+.ant-select-dropdown {
+  background-color: #3f5dff !important; /* Blue background */
+}
+
+/* Set the color of the items in the dropdown menu */
+.ant-select-dropdown-menu-item {
+  color: #ffffff !important; /* White text for dropdown items */
+}
+
+.ant-select-dropdown-menu-item-active {
+  background-color: #4a6aff !important; /* Slightly different blue for selected item */
+  color: #ffffff !important; /* White text for selected item */
+}

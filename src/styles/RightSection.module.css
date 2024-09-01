@@ -178,35 +178,40 @@
   position: relative;
   font-size: 16px;
   font-style: italic;
-  color: #9194A0;
+  color: #9194a0;
   overflow: hidden;
   white-space: nowrap;
 }
 
+/* Set the placeholder text color to red */
+.ant-picker-input input::placeholder {
+  color: #ff0000 !important; /* Red placeholder text */
+}
+
 .typingAnimation::after {
-  content: '.....';
+  content: ".....";
   position: absolute;
   right: 0;
   animation: typing 1.5s steps(3, end) infinite;
 }
 
 @keyframes typing {
-  0% { 
+  0% {
     opacity: 0;
     transform: translateX(-100%);
   }
-  50% { 
+  50% {
     opacity: 1;
     transform: translateX(0);
   }
-  100% { 
+  100% {
     opacity: 0;
     transform: translateX(100%);
   }
 }
 
 .messageAppearance {
-  color: #FFFFFF;
+  color: #ffffff;
   font-weight: 400;
   font-size: 18px;
   line-height: 27px;
