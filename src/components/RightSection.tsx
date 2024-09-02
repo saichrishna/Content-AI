@@ -13,6 +13,7 @@ import { DatePicker, Space } from "antd";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import { endpoints } from "../utils/apiRouter";
+import { companyDetails } from "../utils/companyDescription";
 
 dayjs.extend(customParseFormat);
 const { Option } = Select;
@@ -33,7 +34,6 @@ const RightSection = () => {
   const [image, setImage] = useState("");
   const [userPrompt, setUserPrompt] = useState(false);
   const [regenerate, setRegenerate] = useState(false); // Used to force re-run of the same function
-  const [selectedPlatform, setSelectedPlatform] = useState<number | null>(null);
 
   useEffect(() => {
     if (next && regenerate) {
@@ -47,8 +47,6 @@ const RightSection = () => {
       } else if (next === "imageGenerator") {
         generateImages();
       }
-
-      // Reset `regenerate` to false to avoid unwanted re-runs
       setRegenerate(false);
     }
   }, [next, regenerate]);
@@ -63,10 +61,6 @@ const RightSection = () => {
       setRegenerate(true);
     }
   };
-
-  useEffect(() => {
-    console.log("Current selectedPlatform:", selectedPlatform);
-  }, [selectedPlatform]);
 
   useEffect(() => {
     errorMessage === "" ? null : errorHandling(errorMessage);
@@ -1034,22 +1028,8 @@ const RightSection = () => {
   };
 
   return (
-    <Layout
-      style={{
-        backgroundColor: "#202429",
-        borderRadius: "14px",
-        height: "95%",
-        marginTop: "30px",
-      }}
-    >
-      <Header
-        style={{
-          backgroundColor: "#202429",
-          borderBottom: "1px solid #212540",
-          borderRadius: "14px !important",
-        }}
-      >
-        {/* <Row justify={"center"} align={"middle"}> */}
+    <Layout className={styles.layout}>
+      <Header className={styles.header}>
         <Col
           span={24}
           style={{
@@ -1061,7 +1041,6 @@ const RightSection = () => {
         >
           <AgentImageComponent />
         </Col>
-        {/* </Row> */}
       </Header>
       <Content ref={messagesEndRef} style={{ overflow: "auto" }}>
         <Row
@@ -1148,15 +1127,9 @@ const RightSection = () => {
                   <LogoComponent height={100} />
                 </Col>
                 <Col span={24}>
-                  <Typography.Title
-                    style={{
-                      color: "#FFFFFF",
-                      textAlign: "center",
-                      fontSize: "36px",
-                    }}
-                  >
-                    Welcome to Muse AI
-                  </Typography.Title>
+                  <Typography className={styles.companyTitle}>
+                    {companyDetails.title}
+                  </Typography>
                 </Col>
                 <Col span={24}>
                   <Row>
@@ -1168,34 +1141,17 @@ const RightSection = () => {
                         textAlign: "center",
                       }}
                     >
-                      <Typography
-                        style={{
-                          color: "#FFFFFF",
-                          fontSize: "14px",
-                          lineHeight: "21px",
-                        }}
-                      >
-                        Unlock your creative potential with our powerful content
-                        creation tool—designed to streamline your workflow,
-                        enhance your storytelling, and bring your ideas to life
-                        across any platform.
+                      <Typography className={styles.companyDescription}>
+                        {companyDetails.description}
                       </Typography>
                     </Col>
                     <Col span={7}></Col>
                   </Row>
                 </Col>
                 <Col span={24} style={{ marginTop: 20, cursor: "pointer" }}>
-                  <Typography.Title
-                    style={{
-                      color: "#3F5DFF",
-                      textAlign: "center",
-                      fontSize: "24px",
-                      fontWeight: 400,
-                      lineHeight: "36px",
-                    }}
-                  >
-                    Where Marketing Vision Meets Intelligent Solutions
-                  </Typography.Title>
+                  <Typography className={styles.companySubDescription}>
+                    {companyDetails.subDescription}
+                  </Typography>
                 </Col>
               </Row>
             )}
@@ -1210,15 +1166,7 @@ const RightSection = () => {
                 }}
               >
                 <Col span={24}>
-                  <Typography.Text
-                    style={{
-                      color: "#9194A0",
-                      fontSize: "18px",
-                      fontStyle: "italic",
-                      padding: "20px",
-                    }}
-                    className={styles.typingAnimation}
-                  >
+                  <Typography.Text className={styles.typingAnimation}>
                     typing
                   </Typography.Text>
                 </Col>
@@ -1243,14 +1191,7 @@ const RightSection = () => {
               onChange={(e) => setMessage(e.target.value)}
               value={messageC}
               autoSize
-              style={{
-                backgroundColor: "transparent",
-                color: "white",
-                flex: 1,
-                borderRadius: "87px",
-                border: "2px solid #9194A0",
-                padding: "0px 20px 0px 10px",
-              }}
+              className={styles.userPrompt}
             />
             {!isSending ? (
               <Button
@@ -1259,7 +1200,6 @@ const RightSection = () => {
                 shape="circle"
                 icon={<SendLogoComponent />} // Use your imported SVG here
                 onClick={userPrompt ? definePrompt : defineTopic}
-                // onClick={marketingLeadApproval}
                 style={{ marginLeft: 10 }}
               />
             ) : (
