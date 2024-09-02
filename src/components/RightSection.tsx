@@ -1,14 +1,18 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import styles from "@/styles/RightSection.module.css";
-import nouserlogo from "@/assets/nouserlogo.png";
-import { HashLoader } from "react-spinners";
-import { Button, Col, Input, message, Row, Select } from "antd";
+import {
+  Button,
+  Col,
+  DatePickerProps,
+  Input,
+  message,
+  Row,
+  Select,
+} from "antd";
 const { TextArea } = Input;
 import { Layout, Typography, List, Avatar, Spin, Image } from "antd";
-import { ArrowDownOutlined, SendOutlined } from "@ant-design/icons";
 const { Header, Content, Footer } = Layout;
-const { Paragraph } = Typography;
 import SendLogoComponent from "../assets/sendLogo.svg"; // Adjust the path as necessary
 import LogoComponent from "../assets/Logo.svg"; // Adjust the path as necessary
 import AgentImageComponent from "../assets/Agent.svg"; // Adjust the path as necessary
@@ -26,30 +30,23 @@ const RightSection = () => {
   const [messageC, setMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [allMessages, setAllMessages] = useState<any[]>([]);
-  const [threadId, setThreadId] = useState("");
-  const [data, setData] = useState("");
-  const [botMsg, setBotMessage] = useState("");
   const [latestMessageIndex, setlatestMessageIndex] = useState(0);
   const [latestMessage, setlatestMessage] = useState("");
-  const [gotAnswer, setGotAnswer] = useState(false);
   const [next, setNext] = useState("");
   const [topic, setTopic] = useState("");
   const [prompt, setPrompt] = useState("");
   const [content, setContent] = useState("");
   const [errorMessage, setErrorMessage] = useState(""); // State for error message
-  const [manualLead, setManuallead] = useState(false);
   const [image, setImage] = useState("");
   const [userPrompt, setUserPrompt] = useState(false);
   const [regenerate, setRegenerate] = useState(false); // Used to force re-run of the same function
-  const [selectedDate, setSelectedDate] = useState<dayjs.Dayjs | null>(null);
-  const [selectedPlatform, setSelectedPlatform] = useState("");
-
-  // const handleKeyPress = (e) => {
-  //   if (e.key === "Enter") {
-  //     // Call a function to handle the submission of the message
-  //     setMessage(e.target.value);
-  //   }
-  // };
+  const [selectedDate, setSelectedDate] = useState("");
+  // const [selectedPlatform, setSelectedPlatform] = useState<string | undefined>(
+  //   undefined
+  // );
+  const [selectedPlatform, setSelectedPlatform] = useState<string>('jack');
+  const [platform, setPlatform] = useState("");
+  const [date, setDate] = useState("");
 
   useEffect(() => {
     if (next && regenerate) {
@@ -81,12 +78,12 @@ const RightSection = () => {
   };
 
   useEffect(() => {
-    errorMessage === "" ? null : errorHandling(errorMessage);
-  }, [errorMessage]);
+    console.log("Current selectedPlatform:", selectedPlatform);
+  }, [selectedPlatform]);
 
   useEffect(() => {
-    manualLead === true ? leadByUser() : null;
-  }, [manualLead]);
+    errorMessage === "" ? null : errorHandling(errorMessage);
+  }, [errorMessage]);
 
   useEffect(() => {
     if (
@@ -115,15 +112,18 @@ const RightSection = () => {
       });
     }
   }, [latestMessage, latestMessageIndex]);
-  let concatenatedString = "";
-
-  const handleDateChange = (value: dayjs.Dayjs | null) => {
-    setSelectedDate(value);
-  };
 
   const handlePlatformChange = (value: any) => {
-    debugger;
     setSelectedPlatform(value);
+  };
+
+  const onOk = (value: any) => {
+    var formattedDate = "2020-01-01T12:00:00Z";
+    if (value) {
+      formattedDate = value.format("YYYY-MM-DDTHH:mm:ss[Z]");
+    }
+    setSelectedDate(formattedDate);
+    setDate(formattedDate);
   };
 
   const errorHandling = (errorMessage: any) => {
@@ -1057,62 +1057,64 @@ const RightSection = () => {
     const reqBody = {
       Post_Type: 1920079,
       Post_Content: content,
-      Schedule: selectedDate,
+      Schedule: selectedDate || date,
       Image_URL: image,
       Status: 1920104,
       Social_Media: selectedPlatform,
+      saadas: topic,
+      dsd: prompt,
     };
-    const response = await fetch(
-      "https://api.baserow.io/api/database/rows/table/341222/?user_field_names=true",
-      {
-        method: "POST",
-        headers: {
-          Authorization: "Token hCqzRhjWfC2063aLLL8ryrmZrm0Q3r6U",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(reqBody),
-      }
-    );
-    if (!response.ok) {
-      errorHandling(response.statusText);
-      throw new Error(`Network response was not ok: ${response.statusText}`);
-    }
-    const result = await response.json();
-    if (result.id) {
-      setAllMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          content: (
-            <>
-              <Row>
-                <Typography className={styles.messageAppearance}>
-                  Content was posted successfully. ID : {result.id} and
-                  scheduled for 23-08-2024
-                  {/* scheduled for {result.Schedule} */}
-                </Typography>
-              </Row>
-            </>
-          ),
-          role: "Social Media AI Agent",
-        },
-      ]);
-    } else {
-      setAllMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          content: (
-            <>
-              <Row>
-                <Typography className={styles.messageAppearance}>
-                  Unable to Post Content Right now. Please try again.
-                </Typography>
-              </Row>
-            </>
-          ),
-          role: "Social Media AI Agent",
-        },
-      ]);
-    }
+    // const response = await fetch(
+    //   "https://api.baserow.io/api/database/rows/table/341222/?user_field_names=true",
+    //   {
+    //     method: "POST",
+    //     headers: {
+    //       Authorization: "Token hCqzRhjWfC2063aLLL8ryrmZrm0Q3r6U",
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify(reqBody),
+    //   }
+    // );
+    // if (!response.ok) {
+    //   errorHandling(response.statusText);
+    //   throw new Error(`Network response was not ok: ${response.statusText}`);
+    // }
+    // const result = await response.json();
+    // if (result.id) {
+    //   setAllMessages((prevMessages) => [
+    //     ...prevMessages,
+    //     {
+    //       content: (
+    //         <>
+    //           <Row>
+    //             <Typography className={styles.messageAppearance}>
+    //               Content was posted successfully. ID : {result.id} and
+    //               scheduled for 23-08-2024
+    //               {/* scheduled for {result.Schedule} */}
+    //             </Typography>
+    //           </Row>
+    //         </>
+    //       ),
+    //       role: "Social Media AI Agent",
+    //     },
+    //   ]);
+    // } else {
+    //   setAllMessages((prevMessages) => [
+    //     ...prevMessages,
+    //     {
+    //       content: (
+    //         <>
+    //           <Row>
+    //             <Typography className={styles.messageAppearance}>
+    //               Unable to Post Content Right now. Please try again.
+    //             </Typography>
+    //           </Row>
+    //         </>
+    //       ),
+    //       role: "Social Media AI Agent",
+    //     },
+    //   ]);
+    // }
   };
 
   const selectImage = async (imageURL: string) => {
@@ -1358,10 +1360,12 @@ const RightSection = () => {
                     <DatePicker
                       className="custom-blue-bg"
                       format="YYYY-MM-DD HH:mm:ss"
-                      showTime={{
-                        defaultValue: dayjs("00:00:00", "HH:mm:ss"),
-                      }}
-                      onChange={handleDateChange}
+                      // showTime={{
+                      //   defaultValue: dayjs("00:00:00", "HH:mm:ss"),
+                      // }}
+                      showTime
+                      // onChange={handleDateChange}
+                      onOk={onOk}
                       style={{ width: 300 }}
                     />
                   </Col>
@@ -1373,12 +1377,20 @@ const RightSection = () => {
                       value={selectedPlatform} // Set the value here
                       placeholder="Select Social Media Platform"
                       onChange={handlePlatformChange}
+                      // options={[
+                      //   { value: "jack", label: "Jack" },
+                      //   { value: "lucy", label: "Lucy" },
+                      //   { value: "Yiminghe", label: "yiminghe" },
+                      //   {
+                      //     value: "disabled",
+                      //     label: "Disabled",
+                      //     disabled: true,
+                      //   },
+                      // ]}
                     >
-                      <Option value="1952281">Facebook</Option>
-                      {/* <Option value="witter">Twitter</Option> */}
-                      <Option value="1952281">LinkedIn</Option>
-                      {/* <Option value="Instagram">Instagram</Option>
-                      <Option value="TikTok">TikTok</Option> */}
+                      <Option value="jack">Jack</Option>
+                      <Option value="lucy">Lucy</Option>
+                      <Option value="Yiminghe">Yiminghe</Option>
                     </Select>
                   </Col>
                 </Row>
