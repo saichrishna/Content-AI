@@ -5,7 +5,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "CHATGPT-UWin Bot",
+  title: "Muse.ai",
   description:
     "I am the Spotcheck Bot. Ask me anything regarding procurement, purchase, and logistics.",
 };
