@@ -500,45 +500,6 @@ const RightSection = () => {
       if (!response.ok) {
         errorHandling(response.statusText);
         throw new Error(`Network response was not ok: ${response.statusText}`);
-        setAllMessages((prevMessages) => [
-          ...prevMessages,
-          {
-            content: (
-              <>
-                <Row>
-                  <Typography className={styles.messageAppearance}>
-                    There seem's to be issue with Reviewer AI Agent, Do you wish
-                    to proceed with above content for Approval?
-                  </Typography>
-                </Row>
-                <Row>
-                  <Col span={24}>
-                    <Row>
-                      <Col span={4} style={{ padding: 10 }}>
-                        <Button
-                          type="primary"
-                          onClick={() => marketingLeadApproval()}
-                        >
-                          <Typography className={styles.messageAppearance}>
-                            Yes
-                          </Typography>
-                        </Button>
-                      </Col>
-                      <Col span={4} style={{ padding: 10 }}>
-                        <Button type="primary">
-                          <Typography className={styles.messageAppearance}>
-                            No
-                          </Typography>
-                        </Button>
-                      </Col>
-                    </Row>
-                  </Col>
-                </Row>
-              </>
-            ),
-            role: "Supervisor",
-          },
-        ]);
       }
       const result = await response.json();
       if (result.chatMessageId.length > 0) {
@@ -699,7 +660,7 @@ const RightSection = () => {
               <>
                 <Row>
                   <Typography className={styles.messageAppearance}>
-                    There seem's to be issue with Image Generator AI Agent, Do
+                    There seem&apos;s to be issue with Image Generator AI Agent, Do
                     you wish to proceed with above content for Review?
                   </Typography>
                 </Row>

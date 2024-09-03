@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
+const poppins = Poppins({ weight: ["400", "600"], subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Muse.ai",
@@ -18,12 +19,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
-          rel="stylesheet"
-        />
+        {/* You can remove the link to Poppins if using the import above */}
       </head>
-      <body className={inter.className}>{children}</body>
+      <body className={`${inter.className} ${poppins.className}`}>
+        {children}
+      </body>
     </html>
   );
 }
